@@ -16,6 +16,10 @@ app.use(
 );
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.json({ service: "La Traino API", status: "running" });
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
