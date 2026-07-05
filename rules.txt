@@ -1,0 +1,42 @@
+Project: La Traino
+
+This is a BSc CSIT college project.
+
+The implementation must closely follow the approved proposal.
+
+Budget: $0.
+
+Never introduce paid services.
+
+Never use technologies outside this stack unless I approve.
+
+Frontend:
+React (Vite)
+React Router
+Tailwind CSS
+
+Backend:
+Node.js
+Express
+
+Database:
+PostgreSQL
+
+Authentication:
+JWT
+bcrypt
+
+ORM:
+Prisma
+
+The code must be simple, readable and maintainable.
+
+Never over-engineer.
+
+Always explain important decisions.
+
+Never generate placeholder code.
+
+If unsure, ask before making architectural decisions.
+
+Build one milestone at a time.

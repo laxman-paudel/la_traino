@@ -1,0 +1,37 @@
+const express = require("express");
+const cors = require("cors");
+const authRoutes = require("./routes/authRoutes");
+const traineeRoutes = require("./routes/traineeRoutes");
+const presetRoutes = require("./routes/presetRoutes");
+const trainerRoutes = require("./routes/trainerRoutes");
+const progressRoutes = require("./routes/progressRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+
+const app = express();
+
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  }),
+);
+app.use(express.json());
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
+app.use("/api/auth", authRoutes);
+app.use("/api/trainee", traineeRoutes);
+app.use("/api/trainee", presetRoutes);
+app.use("/api/trainer", trainerRoutes);
+app.use("/api/progress", progressRoutes);
+app.use("/api/admin", adminRoutes);
+
+app.use((err, req, res, next) => {
+  const status = err.status || 500;
+  const message = err.message || "Internal server error";
+  res.status(status).json({ error: message });
+  void next;
+});
+
+module.exports = app;

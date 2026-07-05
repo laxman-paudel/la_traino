@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  TRAINER
+  TRAINEE
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  name        String
+  email       String       @unique
+  password    String?
+  role        Role         @default(TRAINEE)
+  googleId    String?      @unique
+  authProvider AuthProvider @default(LOCAL)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  trainerProfile   TrainerProfile?
+  traineeProfile   TraineeProfile?
+  trainerLinks     TrainerLink[]    @relation("TrainerLinks")
+  traineeLinks     TrainerLink[]    @relation("TraineeLinks")
+  assignedWorkoutsAsTrainer AssignedWorkout[] @relation("AssignedWorkoutTrainer")
+  assignedWorkoutsAsTrainee AssignedWorkout[] @relation("AssignedWorkoutTrainee")
+  workoutLogs               WorkoutLog[]
+  dietPlansAsTrainer        DietPlan[]        @relation("DietPlanTrainer")
+  dietPlansAsTrainee        DietPlan[]        @relation("DietPlanTrainee")
+  feedbackGiven             Feedback[]        @relation("FeedbackGiven")
+  feedbackReceived          Feedback[]        @relation("FeedbackReceived")
+}
+
+model TrainerProfile {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  trainerCode String   @unique
+  bio         String?
+  specialties String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TraineeProfile {
+  id                  Int           @id @default(autoincrement())
+  userId              Int           @unique
+  fitnessGoal         String?
+  dateOfBirth         DateTime?
+  selectedPresetId    Int?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  selectedPreset PresetWorkout? @relation(fields: [selectedPresetId], references: [id], onDelete: SetNull)
+}
+
+model TrainerLink {
+  id         Int      @id @default(autoincrement())
+  trainerId  Int
+  traineeId  Int      @unique
+  createdAt  DateTime @default(now())
+
+  trainer User @relation("TrainerLinks", fields: [trainerId], references: [id], onDelete: Cascade)
+  trainee User @relation("TraineeLinks", fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId])
+}
+
+model PresetWorkout {
+  id          Int                @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  days         PresetWorkoutDay[]
+  traineeSelections TraineeProfile[]
+}
+
+model PresetWorkoutDay {
+  id        Int    @id @default(autoincrement())
+  presetId  Int
+  dayNumber Int
+  name      String?
+  createdAt DateTime @default(now())
+
+  preset    PresetWorkout           @relation(fields: [presetId], references: [id], onDelete: Cascade)
+  exercises PresetWorkoutExercise[]
+
+  @@unique([presetId, dayNumber])
+  @@index([presetId])
+}
+
+model PresetWorkoutExercise {
+  id     Int    @id @default(autoincrement())
+  dayId  Int
+  name   String
+  sets   Int
+  reps   Int
+  createdAt DateTime @default(now())
+
+  day PresetWorkoutDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
+
+  @@index([dayId])
+}
+
+model AssignedWorkout {
+  id        Int      @id @default(autoincrement())
+  trainerId Int
+  traineeId Int
+  day       DateTime
+  name      String?
+  exercises Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trainer User @relation("AssignedWorkoutTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
+  trainee User @relation("AssignedWorkoutTrainee", fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@index([traineeId, day])
+  @@index([trainerId, traineeId])
+}
+
+model WorkoutLog {
+  id          Int        @id @default(autoincrement())
+  traineeId   Int
+  day         DateTime
+  exercises   Json
+  completed   Boolean    @default(false)
+  completedAt DateTime?
+  note        String?
+  createdAt   DateTime   @default(now())
+
+  trainee User @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@index([traineeId, day])
+}
+
+model DietPlan {
+  id        Int      @id @default(autoincrement())
+  trainerId Int
+  traineeId Int
+  day       DateTime
+  meals     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trainer User @relation("DietPlanTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
+  trainee User @relation("DietPlanTrainee", fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@index([traineeId, day])
+  @@index([trainerId, traineeId])
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  trainerId Int
+  traineeId Int
+  weekStart DateTime
+  message   String
+  createdAt DateTime @default(now())
+
+  trainer User @relation("FeedbackGiven", fields: [trainerId], references: [id], onDelete: Cascade)
+  trainee User @relation("FeedbackReceived", fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@unique([trainerId, traineeId, weekStart])
+  @@index([traineeId])
+}
