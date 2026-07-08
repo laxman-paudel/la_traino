@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getFeedback, saveFeedback } from "../../api/trainer";
+import { useToast } from "../../context/ToastContext";
 import PageHeader from "../../components/PageHeader";
 import SectionCard from "../../components/SectionCard";
 import EmptyState from "../../components/EmptyState";
@@ -8,6 +9,7 @@ import { SkeletonCard } from "../../components/Skeleton";
 
 export default function Feedback() {
   const { id } = useParams();
+  const { addToast } = useToast();
 
   const [feedbackList, setFeedbackList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,10 +50,12 @@ export default function Feedback() {
       setWeekStart("");
       setMessage("");
       setSuccess("Feedback saved successfully!");
+      addToast("Feedback saved successfully", "success");
       const updated = await getFeedback(id);
       setFeedbackList(updated.data);
     } catch (err) {
       setSaveError(err.response?.data?.error || "Failed to save feedback");
+      addToast(err.response?.data?.error || "Failed to save feedback", "error");
     } finally {
       setSaving(false);
     }

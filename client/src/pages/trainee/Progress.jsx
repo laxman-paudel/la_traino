@@ -9,6 +9,9 @@ import {
 } from "recharts";
 import { getWeeklyProgress } from "../../api/progress";
 import { fetchFeedback } from "../../api/trainee";
+import PageHeader from "../../components/PageHeader";
+import EmptyState from "../../components/EmptyState";
+import { SkeletonCard, SkeletonStatCard } from "../../components/Skeleton";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -32,8 +35,26 @@ export default function Progress() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center flex-1">
-        <div className="animate-spin h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full" />
+      <div className="space-y-6">
+        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+        <div className="grid grid-cols-2 gap-4">
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+        </div>
+        <SkeletonCard rows={4} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Weekly Progress" />
+        <EmptyState
+          icon="chart"
+          title="Unable to Load Progress"
+          message={error}
+        />
       </div>
     );
   }
@@ -44,99 +65,104 @@ export default function Progress() {
   }));
 
   return (
-    <div className="px-4 py-10">
-      <div className="max-w-xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Weekly Progress
-        </h1>
-        <p className="text-gray-500 mb-8">
-          {data?.weekStart} — {data?.weekEnd}
-        </p>
+    <div className="space-y-6">
+      <PageHeader
+        title="Weekly Progress"
+        subtitle={
+          data
+            ? `${data.weekStart} — ${data.weekEnd}`
+            : "Your training progress for this week"
+        }
+      />
 
-        {error ? (
-          <div
-            role="alert"
-            className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 text-center"
-          >
-            <p className="text-gray-500">{error}</p>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-indigo-50 opacity-30" />
+          <p className="text-sm text-gray-500 mb-1">Days Completed</p>
+          <p className="text-3xl font-bold text-gray-900">
+            {data?.daysCompleted ?? 0}
+            <span className="text-lg text-gray-400 font-normal">
+              {" "}/ {data?.totalDays ?? 7}
+            </span>
+          </p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-emerald-50 opacity-30" />
+          <p className="text-sm text-gray-500 mb-1">Completion Rate</p>
+          <p className="text-3xl font-bold text-emerald-600">
+            {data?.completionRate ?? 0}%
+          </p>
+        </div>
+      </div>
+
+      {chartData.length > 0 ? (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">
+            Daily Overview
+          </h2>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={chartData}>
+              <XAxis
+                dataKey="day"
+                tick={{ fontSize: 12, fill: "#6b7280" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                domain={[0, 1]}
+                ticks={[0, 1]}
+                tick={{ fontSize: 12, fill: "#6b7280" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip />
+              <Bar
+                dataKey="Completed"
+                fill="#4f46e5"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={40}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      ) : (
+        <EmptyState
+          icon="chart"
+          title="No Activity Yet"
+          message="Complete your first workout to see your weekly progress chart."
+          compact
+        />
+      )}
+
+      <div>
+        <h2 className="text-lg font-bold text-gray-900 mb-4">
+          Weekly Feedback
+        </h2>
+        {feedback.length === 0 ? (
+          <EmptyState
+            icon="clipboard"
+            title="No Feedback Yet"
+            message="Your trainer hasn't shared any feedback yet. Feedback appears here after your trainer reviews your progress."
+            compact
+          />
         ) : (
-          <>
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 text-center">
-                <p className="text-sm text-gray-500 mb-1">Days Completed</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {data?.daysCompleted}
-                  <span className="text-lg text-gray-400 font-normal">
-                    {" "}
-                    / {data?.totalDays}
-                  </span>
+          <div className="space-y-3">
+            {feedback.map((fb, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5"
+              >
+                <p className="text-sm text-gray-500 mb-1">
+                  Week of {new Date(fb.weekStart).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
                 </p>
+                <p className="text-gray-900 leading-relaxed">{fb.message}</p>
               </div>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 text-center">
-                <p className="text-sm text-gray-500 mb-1">Completion Rate</p>
-                <p className="text-3xl font-bold text-indigo-600">
-                  {data?.completionRate}%
-                </p>
-              </div>
-            </div>
-
-            {chartData.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">
-                  Daily Overview
-                </h2>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={chartData}>
-                    <XAxis
-                      dataKey="day"
-                      tick={{ fontSize: 12, fill: "#6b7280" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      domain={[0, 1]}
-                      ticks={[0, 1]}
-                      tick={{ fontSize: 12, fill: "#6b7280" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip />
-                    <Bar
-                      dataKey="Completed"
-                      fill="#4f46e5"
-                      radius={[4, 4, 0, 0]}
-                      maxBarSize={40}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            <h2 className="text-lg font-bold text-gray-900 mb-4 mt-8">
-              Weekly Feedback
-            </h2>
-
-            {feedback.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-                <p className="text-gray-500">No feedback available yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {feedback.map((fb, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5"
-                  >
-                    <p className="text-sm text-gray-500 mb-1">
-                      Week of {fb.weekStart}
-                    </p>
-                    <p className="text-gray-900">{fb.message}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+            ))}
+          </div>
         )}
       </div>
     </div>

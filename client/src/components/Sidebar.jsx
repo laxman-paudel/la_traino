@@ -74,6 +74,7 @@ export default function Sidebar({ mobile, onNavigate }) {
       ? [
           { label: "Dashboard", path: "/trainee/dashboard", icon: "Dashboard" },
           { label: "Today's Workout", path: "/trainee/workouts", icon: "Workout" },
+          { label: "Today's Diet", path: "/trainee/diet", icon: "Presets" },
           { label: "Weekly Progress", path: "/trainee/progress", icon: "Progress" },
           ...(!user?.traineeLinks?.[0]?.trainer
             ? [

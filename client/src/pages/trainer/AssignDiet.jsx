@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { assignDiet } from "../../api/trainer";
+import { useToast } from "../../context/ToastContext";
 import PageHeader from "../../components/PageHeader";
 
 const DAYS = [
@@ -38,6 +39,7 @@ function FoodChips({ items }) {
 export default function AssignDiet() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   const [day, setDay] = useState("");
   const [meals, setMeals] = useState([{ time: "", items: "" }]);
@@ -95,9 +97,11 @@ export default function AssignDiet() {
             .filter(Boolean),
         })),
       });
+      addToast("Diet plan assigned successfully", "success");
       navigate("/trainer/dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to assign diet plan");
+      addToast(err.response?.data?.error || "Failed to assign diet plan", "error");
     } finally {
       setSaving(false);
     }

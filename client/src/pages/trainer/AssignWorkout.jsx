@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { assignWorkout } from "../../api/trainer";
+import { useToast } from "../../context/ToastContext";
 import PageHeader from "../../components/PageHeader";
 
 const DAYS = [
@@ -16,6 +17,7 @@ const DAYS = [
 export default function AssignWorkout() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   const [day, setDay] = useState("");
   const [exercises, setExercises] = useState([
@@ -74,9 +76,11 @@ export default function AssignWorkout() {
           reps: parseInt(ex.reps, 10),
         })),
       });
+      addToast("Workout assigned successfully", "success");
       navigate("/trainer/dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to assign workout");
+      addToast(err.response?.data?.error || "Failed to assign workout", "error");
     } finally {
       setSaving(false);
     }

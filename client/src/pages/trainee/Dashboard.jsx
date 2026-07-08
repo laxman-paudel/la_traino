@@ -18,6 +18,20 @@ function SkeletonLinked() {
   );
 }
 
+function StatusBadge({ assigned, label }) {
+  return assigned ? (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+      <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+      {label}
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">
+      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
+      Not Assigned
+    </span>
+  );
+}
+
 export default function TraineeDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -75,35 +89,52 @@ export default function TraineeDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-indigo-50 opacity-30" />
-            <p className="text-sm text-gray-500 mb-1">Trainer</p>
-            <p className="text-lg font-bold text-indigo-600 truncate">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-500">Your Trainer</p>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-medium">
+                <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
+                Linked
+              </span>
+            </div>
+            <p className="text-lg font-bold text-gray-900 truncate">
               {linkedTrainer.name}
             </p>
             <p className="text-xs text-gray-400 mt-1 font-mono">
-              {linkedTrainer.trainerProfile.trainerCode}
+              Code: {linkedTrainer.trainerProfile.trainerCode}
             </p>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-purple-50 opacity-30" />
-            <p className="text-sm text-gray-500 mb-1">Today's Workout</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-500">Today's Workout</p>
+              <StatusBadge assigned={!!extra?.todayWorkout} label="Assigned" />
+            </div>
             {extra?.todayWorkout ? (
               <>
                 <p className="text-lg font-bold text-purple-600">
                   {extra.todayWorkout.exercises?.length || 0} exercises
                 </p>
                 <p className="text-xs text-gray-400 mt-1 capitalize">
-                  {extra.todayWorkout.source} · {extra.todayWorkout.day}
+                  {extra.todayWorkout.source === "trainer"
+                    ? "Trainer Assigned"
+                    : "Preset Workout"}{" "}
+                  · {extra.todayWorkout.day}
                 </p>
               </>
             ) : (
-              <p className="text-sm text-gray-400 mt-1">No workout scheduled</p>
+              <p className="text-sm text-gray-400 mt-2">
+                No workout scheduled for today
+              </p>
             )}
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-green-50 opacity-30" />
-            <p className="text-sm text-gray-500 mb-1">Today's Diet</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-500">Today's Diet</p>
+              <StatusBadge assigned={!!extra?.todayDiet} label="Assigned" />
+            </div>
             {extra?.todayDiet ? (
               <>
                 <p className="text-lg font-bold text-green-600">
@@ -114,13 +145,17 @@ export default function TraineeDashboard() {
                 </p>
               </>
             ) : (
-              <p className="text-sm text-gray-400 mt-1">No diet assigned</p>
+              <p className="text-sm text-gray-400 mt-2">
+                No diet assigned for today
+              </p>
             )}
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-emerald-50 opacity-30" />
-            <p className="text-sm text-gray-500 mb-1">Weekly Progress</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-500">Weekly Progress</p>
+            </div>
             {extra?.progress ? (
               <>
                 <p className="text-lg font-bold text-emerald-600">
@@ -131,7 +166,7 @@ export default function TraineeDashboard() {
                 </p>
               </>
             ) : (
-              <p className="text-sm text-gray-400 mt-1">No data yet</p>
+              <p className="text-sm text-gray-400 mt-2">No activity yet</p>
             )}
           </div>
         </div>
@@ -151,8 +186,8 @@ export default function TraineeDashboard() {
               <h3 className="text-lg font-bold mb-1">Today's Workout</h3>
               <p className="text-sm text-indigo-200">
                 {extra?.todayWorkout
-                  ? "View and complete your workout"
-                  : "Check your scheduled routine"}
+                  ? `${extra.todayWorkout.exercises?.length || 0} exercises · ${extra.todayWorkout.source === "trainer" ? "Trainer" : "Preset"}`
+                  : "No workout scheduled today"}
               </p>
             </button>
             <button
@@ -175,9 +210,17 @@ export default function TraineeDashboard() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">
-              Latest Feedback
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Latest Feedback
+              </h3>
+              {extra?.latestFeedback && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  Available
+                </span>
+              )}
+            </div>
             {extra?.latestFeedback ? (
               <>
                 <p className="text-xs text-gray-400 mb-2">
@@ -188,7 +231,14 @@ export default function TraineeDashboard() {
                 </p>
               </>
             ) : (
-              <p className="text-sm text-gray-400">No feedback yet from your trainer.</p>
+              <div className="flex flex-col items-center py-4 text-center">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-400">No feedback yet.</p>
+              </div>
             )}
           </div>
         </div>
@@ -205,7 +255,12 @@ export default function TraineeDashboard() {
 
       {selectedPreset ? (
         <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white">
-          <p className="text-sm text-indigo-200 mb-1">Selected Preset</p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/20 text-white rounded-full text-xs font-medium">
+              <span className="w-1.5 h-1.5 bg-white rounded-full" />
+              Preset Selected
+            </span>
+          </div>
           <h2 className="text-2xl font-bold mb-1">{selectedPreset.name}</h2>
           {selectedPreset.description && (
             <p className="text-sm text-indigo-100 mb-4">{selectedPreset.description}</p>
@@ -214,14 +269,14 @@ export default function TraineeDashboard() {
             <button
               type="button"
               onClick={() => navigate("/trainee/workouts")}
-              className="px-5 py-2.5 bg-white text-indigo-600 rounded-lg hover:bg-indigo-50 transition font-medium text-sm"
+              className="px-5 py-2.5 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition font-medium text-sm"
             >
               View Today's Workout
             </button>
             <button
               type="button"
               onClick={() => navigate("/trainee/progress")}
-              className="px-5 py-2.5 bg-white/20 text-white rounded-lg hover:bg-white/30 transition font-medium text-sm"
+              className="px-5 py-2.5 bg-white/20 text-white rounded-xl hover:bg-white/30 transition font-medium text-sm"
             >
               Weekly Progress
             </button>
@@ -277,7 +332,7 @@ export default function TraineeDashboard() {
             <div>
               <h4 className="text-sm font-semibold text-amber-800 mb-1">Get Started</h4>
               <p className="text-sm text-amber-700">
-                Choose a workout preset to begin training on your own, or link to a trainer for a personalized experience.
+                Choose a workout preset to begin training on your own, or link to a trainer for a personalized experience with workout and diet plans.
               </p>
             </div>
           </div>

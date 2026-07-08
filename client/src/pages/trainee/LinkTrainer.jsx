@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { linkTrainer } from "../../api/trainee";
 import { fetchMe } from "../../api/auth";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import PageHeader from "../../components/PageHeader";
 
 export default function LinkTrainer() {
   const navigate = useNavigate();
   const { loginAction, user } = useAuth();
+  const { addToast } = useToast();
 
   const [trainerCode, setTrainerCode] = useState("");
   const [error, setError] = useState("");
@@ -25,9 +27,11 @@ export default function LinkTrainer() {
       const token = localStorage.getItem("token");
       loginAction(token, res.data.user);
       setSuccess("Successfully linked to trainer!");
+      addToast("Successfully linked to trainer", "success");
       setTimeout(() => navigate("/trainee/dashboard", { replace: true }), 1200);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to link trainer");
+      addToast(err.response?.data?.error || "Failed to link trainer", "error");
     } finally {
       setSubmitting(false);
     }

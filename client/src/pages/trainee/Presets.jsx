@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { fetchPresets, selectPreset } from "../../api/preset";
 import { fetchMe } from "../../api/auth";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 
 export default function Presets() {
   const { loginAction } = useAuth();
+  const { addToast } = useToast();
 
   const [presets, setPresets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,10 +31,12 @@ export default function Presets() {
       const token = localStorage.getItem("token");
       loginAction(token, res.data.user);
       setSuccess("Preset selected successfully!");
+      addToast("Preset selected successfully", "success");
       const updated = await fetchPresets();
       setPresets(updated.data.presets);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to select preset");
+      addToast(err.response?.data?.error || "Failed to select preset", "error");
     } finally {
       setSelecting(null);
     }

@@ -40,7 +40,16 @@ async function getDashboard(trainerId) {
     orderBy: { createdAt: "desc" },
     include: {
       trainee: {
-        select: { id: true, name: true, email: true },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          traineeProfile: {
+            select: {
+              selectedPreset: { select: { id: true, name: true } },
+            },
+          },
+        },
       },
     },
   });
@@ -53,6 +62,7 @@ async function getDashboard(trainerId) {
       name: link.trainee.name,
       email: link.trainee.email,
       linkedAt: link.createdAt,
+      preset: link.trainee.traineeProfile?.selectedPreset ?? null,
     })),
   };
 }
