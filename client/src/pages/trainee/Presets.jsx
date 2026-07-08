@@ -98,9 +98,7 @@ export default function Presets() {
                     {preset.name}
                   </h2>
                   {preset.isSelected && (
-                    <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full">
-                      Selected
-                    </span>
+                    <StatusBadge variant="primary">Selected</StatusBadge>
                   )}
                 </div>
 

@@ -20,10 +20,11 @@ enum AuthProvider {
 model User {
   id          Int          @id @default(autoincrement())
   name        String
-  email       String       @unique
-  password    String?
-  role        Role         @default(TRAINEE)
-  googleId    String?      @unique
+  email        String       @unique
+  password     String?
+  role         Role         @default(TRAINEE)
+  googleId     String?      @unique
+  profileImage String?
   authProvider AuthProvider @default(LOCAL)
   isActive    Boolean      @default(true)
   createdAt   DateTime     @default(now())
@@ -42,6 +43,16 @@ model User {
   feedbackReceived          Feedback[]        @relation("FeedbackReceived")
   workoutPresets            TrainerWorkoutPreset[]
   dietPresets               TrainerDietPreset[]
+  exercises                 Exercise[]
+  workoutTemplates          WorkoutTemplate[]
+  foodItems                 FoodItem[]
+  dietTemplates             DietTemplate[]
+  coachingNotesGiven        CoachingNote[]    @relation("CoachingNoteTrainer")
+  coachingNotesReceived     CoachingNote[]    @relation("CoachingNoteTrainee")
+  exerciseCommentsGiven     ExerciseComment[] @relation("ExerciseCommentTrainer")
+  exerciseCommentsReceived  ExerciseComment[] @relation("ExerciseCommentTrainee")
+  dietCommentsGiven         DietComment[]     @relation("DietCommentTrainer")
+  dietCommentsReceived      DietComment[]     @relation("DietCommentTrainee")
 }
 
 model TrainerProfile {
@@ -141,6 +152,7 @@ model WorkoutLog {
   traineeId   Int
   day         DateTime
   exercises   Json
+  progress    Json?
   completed   Boolean    @default(false)
   completedAt DateTime?
   note        String?
@@ -152,13 +164,16 @@ model WorkoutLog {
 }
 
 model DietPlan {
-  id        Int      @id @default(autoincrement())
-  trainerId Int
-  traineeId Int
-  day       DateTime
-  meals     Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int        @id @default(autoincrement())
+  trainerId   Int
+  traineeId   Int
+  day         DateTime
+  meals       Json
+  progress    Json?
+  completed   Boolean    @default(false)
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   trainer User @relation("DietPlanTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
   trainee User @relation("DietPlanTrainee", fields: [traineeId], references: [id], onDelete: Cascade)
@@ -171,15 +186,87 @@ model Feedback {
   id        Int      @id @default(autoincrement())
   trainerId Int
   traineeId Int
-  weekStart DateTime
+  weekStart DateTime?
   message   String
+  title     String?
+  priority  String?
+  category  String?
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
   trainer User @relation("FeedbackGiven", fields: [trainerId], references: [id], onDelete: Cascade)
   trainee User @relation("FeedbackReceived", fields: [traineeId], references: [id], onDelete: Cascade)
 
-  @@unique([trainerId, traineeId, weekStart])
   @@index([traineeId])
+  @@index([trainerId, traineeId])
+}
+
+model CoachingNote {
+  id        Int      @id @default(autoincrement())
+  trainerId Int
+  traineeId Int
+  title     String
+  message   String
+  priority  String?
+  category  String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  trainer User @relation("CoachingNoteTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
+  trainee User @relation("CoachingNoteTrainee", fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId, traineeId])
+  @@index([traineeId])
+}
+
+model ExerciseComment {
+  id           Int      @id @default(autoincrement())
+  trainerId    Int
+  traineeId    Int
+  exerciseName String
+  comment      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  trainer User @relation("ExerciseCommentTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
+  trainee User @relation("ExerciseCommentTrainee", fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@unique([trainerId, traineeId, exerciseName])
+  @@index([trainerId, traineeId])
+}
+
+model DietComment {
+  id        Int      @id @default(autoincrement())
+  trainerId Int
+  traineeId Int
+  mealType  String
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trainer User @relation("DietCommentTrainer", fields: [trainerId], references: [id], onDelete: Cascade)
+  trainee User @relation("DietCommentTrainee", fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@unique([trainerId, traineeId, mealType])
+  @@index([trainerId, traineeId])
+}
+
+model WorkoutTemplate {
+  id               Int      @id @default(autoincrement())
+  trainerId        Int
+  name             String
+  description      String?
+  difficulty       String?
+  estimatedDuration Int?
+  exercises        Json
+  archived         Boolean  @default(false)
+  favorited        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  trainer User @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId])
 }
 
 model TrainerWorkoutPreset {
@@ -235,4 +322,65 @@ model GlobalDietPreset {
   meals       Json
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Exercise {
+  id               Int      @id @default(autoincrement())
+  name             String
+  category         String
+  description      String?
+  equipment        String?
+  difficulty       String?
+  primaryMuscles   Json?
+  secondaryMuscles Json?
+  instructions     String?
+  tips             String?
+  commonMistakes   String?
+  imageUrl         String?
+  youtubeUrl       String?
+  trainerId        Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  trainer User? @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId])
+  @@index([category])
+}
+
+model FoodItem {
+  id          Int      @id @default(autoincrement())
+  name        String
+  category    String
+  servingSize String?
+  calories    Int?
+  protein     Float?
+  carbs       Float?
+  fat         Float?
+  imageUrl    String?
+  description String?
+  trainerId   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trainer User? @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId])
+  @@index([category])
+}
+
+model DietTemplate {
+  id          Int      @id @default(autoincrement())
+  trainerId   Int
+  name        String
+  description String?
+  meals       Json
+  archived    Boolean  @default(false)
+  favorited   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trainer User @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId])
 }

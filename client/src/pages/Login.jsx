@@ -4,6 +4,29 @@ import { useAuth } from "../context/AuthContext";
 import { login, googleLogin } from "../api/auth";
 import { ROLE_LINKS } from "../constants";
 
+const ROLES = [
+  {
+    value: "TRAINEE",
+    label: "Trainee",
+    desc: "Follow workouts and track progress",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 6.75V3.5a.5.5 0 00-.5-.5h-8a.5.5 0 00-.5.5v3.25m9 0l3 3v7.5l-3 3m-9-13.5L4.5 9.75v7.5l3 3m9-13.5V3.5m0 3.25H7.5m9 0v7.5m-9-7.5v7.5" />
+      </svg>
+    ),
+  },
+  {
+    value: "TRAINER",
+    label: "Trainer",
+    desc: "Create plans and manage trainees",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+      </svg>
+    ),
+  },
+];
+
 function PasswordInput({ value, onChange, placeholder }) {
   const [show, setShow] = useState(false);
   return (
@@ -49,6 +72,11 @@ export default function Login() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [showGoogleRole, setShowGoogleRole] = useState(false);
+  const [googleRole, setGoogleRole] = useState("TRAINEE");
+  const [pendingCredential, setPendingCredential] = useState(null);
+
   useEffect(() => {
     if (isAuthenticated || !window.google || googleInitRef.current || !googleEnabled) return;
     googleInitRef.current = true;
@@ -56,12 +84,9 @@ export default function Login() {
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: handleGoogleCredential,
+      cancel_on_tap_outside: false,
+      auto_select: false,
     });
-
-    window.google.accounts.id.renderButton(
-      document.getElementById("google-login-button"),
-      { type: "standard", shape: "pill", theme: "outline", size: "large" },
-    );
   }, [isAuthenticated]);
 
   if (isAuthenticated) {
@@ -100,17 +125,64 @@ export default function Login() {
     }
   }
 
-  function handleGoogleCredential(googleResponse) {
+  async function handleGoogleCredential(googleResponse) {
+    const credential = googleResponse.credential;
+    setGoogleLoading(true);
     setError("");
-    googleLogin(googleResponse.credential)
-      .then((res) => {
-        const { token, user } = res.data;
-        loginAction(token, user);
-        navigate(ROLE_LINKS[user.role] || "/", { replace: true });
-      })
-      .catch((err) => {
-        setError(err.response?.data?.error || "Google login failed");
-      });
+
+    try {
+      const res = await googleLogin(credential);
+      const { token, user } = res.data;
+      loginAction(token, user);
+      navigate(ROLE_LINKS[user.role] || "/", { replace: true });
+    } catch (err) {
+      const msg = err.response?.data?.error || "";
+      if (msg.includes("Role must be")) {
+        setPendingCredential(credential);
+        setGoogleRole("TRAINEE");
+        setShowGoogleRole(true);
+      } else if (msg.includes("already belongs to an existing account")) {
+        setError("This email is already registered with email/password. Please sign in using your email and password.");
+      } else {
+        setError(msg || "Google sign-in failed");
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
+
+  async function handleGoogleRoleConfirm() {
+    if (!pendingCredential) return;
+    setGoogleLoading(true);
+    setError("");
+
+    try {
+      const res = await googleLogin(pendingCredential, googleRole);
+      const { token, user } = res.data;
+      loginAction(token, user);
+      navigate(ROLE_LINKS[user.role] || "/", { replace: true });
+    } catch (err) {
+      setError(err.response?.data?.error || "Google sign-in failed");
+    } finally {
+      setGoogleLoading(false);
+      setShowGoogleRole(false);
+      setPendingCredential(null);
+    }
+  }
+
+  function handleGoogleClick() {
+    if (!window.google) {
+      setError("Google Sign-In is not available. Please try again or use email/password.");
+      return;
+    }
+    setGoogleLoading(true);
+    setError("");
+    window.google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        setGoogleLoading(false);
+        setError("Sign-in popup was blocked or dismissed. Please try again.");
+      }
+    });
   }
 
   return (
@@ -239,8 +311,78 @@ export default function Login() {
                     <span className="bg-white px-3 text-sm text-gray-400">or continue with</span>
                   </div>
                 </div>
-                <div id="google-login-button" className="flex justify-center" />
+                <button
+                  type="button"
+                  onClick={handleGoogleClick}
+                  disabled={googleLoading}
+                  className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium text-sm text-gray-700"
+                >
+                  {googleLoading ? (
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                    </svg>
+                  )}
+                  {googleLoading ? "Signing in..." : "Continue with Google"}
+                </button>
               </>
+            )}
+
+            {showGoogleRole && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm" role="dialog" aria-modal="true">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">Choose your role</h3>
+                  <p className="text-sm text-gray-500 mb-4">Select how you want to use La Traino</p>
+                  <div className="space-y-2 mb-5">
+                    {ROLES.map((r) => (
+                      <button
+                        key={r.value}
+                        type="button"
+                        onClick={() => setGoogleRole(r.value)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition cursor-pointer ${
+                          googleRole === r.value
+                            ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                            : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                        }`}
+                      >
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                          googleRole === r.value ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-400"
+                        }`}>
+                          {r.icon}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-sm">{r.label}</div>
+                          <div className="text-xs opacity-80">{r.desc}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => { setShowGoogleRole(false); setPendingCredential(null); }}
+                      className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium text-sm"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleGoogleRoleConfirm}
+                      disabled={googleLoading}
+                      className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-semibold text-sm shadow-sm shadow-indigo-200"
+                    >
+                      {googleLoading ? "Creating..." : "Continue"}
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
 
             <p className="mt-6 text-center text-sm text-gray-500">

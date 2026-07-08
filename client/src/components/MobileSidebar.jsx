@@ -5,7 +5,7 @@ export default function MobileSidebar({ open, onClose }) {
     <>
       {open && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
           onClick={onClose}
         />
       )}

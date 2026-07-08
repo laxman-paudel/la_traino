@@ -6,6 +6,12 @@ const presetRoutes = require("./routes/presetRoutes");
 const trainerRoutes = require("./routes/trainerRoutes");
 const progressRoutes = require("./routes/progressRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const exerciseRoutes = require("./routes/exerciseRoutes");
+const templateRoutes = require("./routes/templateRoutes");
+const foodRoutes = require("./routes/foodRoutes");
+const dietTemplateRoutes = require("./routes/dietTemplateRoutes");
+const coachingRoutes = require("./routes/coachingRoutes");
+const exerciseHistoryRoutes = require("./routes/exerciseHistoryRoutes");
 
 const app = express();
 
@@ -30,6 +36,12 @@ app.use("/api/trainee", presetRoutes);
 app.use("/api/trainer", trainerRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/exercises", exerciseRoutes);
+app.use("/api/trainer/templates", templateRoutes);
+app.use("/api/foods", foodRoutes);
+app.use("/api/trainer/diet-templates", dietTemplateRoutes);
+app.use("/api/trainer/coaching", coachingRoutes);
+app.use("/api/trainee", exerciseHistoryRoutes);
 
 app.use((err, req, res, next) => {
   const status = err.status || 500;

@@ -2,6 +2,7 @@ const { Router } = require("express");
 const trainerController = require("../controllers/trainerController");
 const trainerPresetController = require("../controllers/trainerPresetController");
 const globalPresetController = require("../controllers/globalPresetController");
+const exerciseHistoryController = require("../controllers/exerciseHistoryController");
 const protect = require("../middleware/protect");
 const restrictTo = require("../middleware/restrictTo");
 
@@ -180,6 +181,13 @@ router.post(
   protect,
   restrictTo("TRAINER"),
   trainerPresetController.duplicateDietPreset,
+);
+
+router.get(
+  "/trainees/:id/exercise-history/:exerciseName",
+  protect,
+  restrictTo("TRAINER"),
+  exerciseHistoryController.getTrainerHistory,
 );
 
 module.exports = router;

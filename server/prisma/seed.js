@@ -322,8 +322,268 @@ const globalWorkoutPresets = [
 ];
 
 // ---------------------------------------------------------------------------
-// Seed execution
+// Individual Exercise Library — 190+ exercises across 15 categories
 // ---------------------------------------------------------------------------
+const exerciseData = [
+  // ── Chest (14) ──
+  { name: "Bench Press", category: "chest", equipment: "Barbell", difficulty: "Intermediate", description: "Flat barbell bench press for overall chest development." },
+  { name: "Incline Bench Press", category: "chest", equipment: "Barbell", difficulty: "Intermediate", description: "Targets the upper chest at a 30-45 degree incline." },
+  { name: "Decline Bench Press", category: "chest", equipment: "Barbell", difficulty: "Intermediate", description: "Emphasizes the lower chest at a decline angle." },
+  { name: "Dumbbell Bench Press", category: "chest", equipment: "Dumbbells", difficulty: "Intermediate" },
+  { name: "Incline Dumbbell Press", category: "chest", equipment: "Dumbbells", difficulty: "Intermediate", description: "Upper chest focus with dumbbells for greater range of motion." },
+  { name: "Decline Dumbbell Press", category: "chest", equipment: "Dumbbells", difficulty: "Intermediate" },
+  { name: "Dumbbell Flyes", category: "chest", equipment: "Dumbbells", difficulty: "Intermediate", description: "Isolation movement for chest stretch and contraction." },
+  { name: "Cable Flyes", category: "chest", equipment: "Cable", difficulty: "Intermediate", description: "Cable crossover for constant tension on the chest." },
+  { name: "Machine Chest Press", category: "chest", equipment: "Machine", difficulty: "Beginner" },
+  { name: "Push-up", category: "chest", equipment: "Bodyweight", difficulty: "Beginner", description: "Classic bodyweight chest and tricep exercise." },
+  { name: "Wide Push-up", category: "chest", equipment: "Bodyweight", difficulty: "Beginner", description: "Wider hand placement for greater chest activation." },
+  { name: "Decline Push-up", category: "chest", equipment: "Bodyweight", difficulty: "Intermediate" },
+  { name: "Chest Dip", category: "chest", equipment: "Parallel Bars", difficulty: "Intermediate", description: "Leaning forward dip variation for lower chest." },
+  { name: "Pec Deck Flyes", category: "chest", equipment: "Machine", difficulty: "Beginner", description: "Machine-based chest isolation for beginners." },
+  // ── Back (14) ──
+  { name: "Pull-up", category: "back", equipment: "Pull-up Bar", difficulty: "Intermediate", description: "Compound vertical pull for lat width." },
+  { name: "Chin-up", category: "back", equipment: "Pull-up Bar", difficulty: "Intermediate", description: "Underhand grip pull-up emphasizing biceps and lats." },
+  { name: "Lat Pulldown", category: "back", equipment: "Cable", difficulty: "Beginner", description: "Vertical pulling movement for latissimus dorsi." },
+  { name: "Wide-Grip Lat Pulldown", category: "back", equipment: "Cable", difficulty: "Intermediate", description: "Wider grip for greater lat width emphasis." },
+  { name: "Close-Grip Lat Pulldown", category: "back", equipment: "Cable", difficulty: "Intermediate", description: "Close grip for lower lat activation." },
+  { name: "Barbell Row", category: "back", equipment: "Barbell", difficulty: "Intermediate", description: "Compound horizontal pull for back thickness." },
+  { name: "Pendlay Row", category: "back", equipment: "Barbell", difficulty: "Advanced", description: "Explosive barbell row from a dead stop each rep." },
+  { name: "Dumbbell Row", category: "back", equipment: "Dumbbells", difficulty: "Intermediate", description: "Unilateral row for back thickness and core stability." },
+  { name: "Seated Cable Row", category: "back", equipment: "Cable", difficulty: "Beginner", description: "Controlled horizontal pull for mid-back development." },
+  { name: "T-Bar Row", category: "back", equipment: "Barbell", difficulty: "Intermediate" },
+  { name: "Seal Row", category: "back", equipment: "Barbell", difficulty: "Intermediate", description: "Chest-supported row for back thickness without lower back strain." },
+  { name: "Straight-Arm Pulldown", category: "back", equipment: "Cable", difficulty: "Intermediate", description: "Isolation movement for the lats with straight arms." },
+  { name: "Deadlift", category: "back", equipment: "Barbell", difficulty: "Advanced", description: "Full body compound lift targeting the entire posterior chain." },
+  { name: "Hyperextension", category: "back", equipment: "Bench", difficulty: "Beginner", description: "Lower back extension exercise for spinal erectors." },
+  // ── Legs (14) ──
+  { name: "Barbell Back Squat", category: "legs", equipment: "Barbell", difficulty: "Intermediate", description: "Foundation leg exercise targeting quads, glutes, and core." },
+  { name: "Front Squat", category: "legs", equipment: "Barbell", difficulty: "Advanced", description: "Quad-dominant squat variation with upright torso." },
+  { name: "Goblet Squat", category: "legs", equipment: "Dumbbell", difficulty: "Beginner", description: "Beginner-friendly squat with a dumbbell held at the chest." },
+  { name: "Bulgarian Split Squat", category: "legs", equipment: "Dumbbells", difficulty: "Intermediate", description: "Single-leg squat with rear foot elevated." },
+  { name: "Walking Lunge", category: "legs", equipment: "Dumbbells", difficulty: "Intermediate", description: "Dynamic lunge pattern for quads, glutes, and balance." },
+  { name: "Reverse Lunge", category: "legs", equipment: "Dumbbells", difficulty: "Intermediate" },
+  { name: "Leg Press", category: "legs", equipment: "Machine", difficulty: "Beginner", description: "Compound leg machine press for quad and glute mass." },
+  { name: "Leg Extension", category: "legs", equipment: "Machine", difficulty: "Beginner", description: "Isolation exercise for the quadriceps." },
+  { name: "Leg Curl", category: "legs", equipment: "Machine", difficulty: "Beginner", description: "Isolation exercise for the hamstrings." },
+  { name: "Romanian Deadlift", category: "legs", equipment: "Barbell", difficulty: "Intermediate", description: "Hip-hinge movement for hamstring and glute development." },
+  { name: "Box Jump", category: "legs", equipment: "Box", difficulty: "Intermediate", description: "Explosive plyometric movement for power and leg strength." },
+  { name: "Step-up", category: "legs", equipment: "Bench", difficulty: "Beginner", description: "Unilateral leg exercise for functional strength." },
+  { name: "Hack Squat", category: "legs", equipment: "Machine", difficulty: "Intermediate" },
+  { name: "Pistol Squat", category: "legs", equipment: "Bodyweight", difficulty: "Advanced", description: "Single-leg squat requiring strength, balance, and mobility." },
+  // ── Glutes (12) ──
+  { name: "Hip Thrust", category: "glutes", equipment: "Barbell", difficulty: "Intermediate", description: "Barbell hip thrust for glute activation and hypertrophy." },
+  { name: "Glute Bridge", category: "glutes", equipment: "Bodyweight", difficulty: "Beginner", description: "Bodyweight hip extension for glute engagement." },
+  { name: "Single-Leg Glute Bridge", category: "glutes", equipment: "Bodyweight", difficulty: "Intermediate" },
+  { name: "Cable Pull-Through", category: "glutes", equipment: "Cable", difficulty: "Intermediate", description: "Hip-hinge cable movement targeting the glutes." },
+  { name: "Glute Ham Raise", category: "glutes", equipment: "Machine", difficulty: "Advanced", description: "Nordic curl variation for glute and hamstring development." },
+  { name: "Donkey Kick", category: "glutes", equipment: "Bodyweight", difficulty: "Beginner", description: "Isolation glute activation exercise on all fours." },
+  { name: "Fire Hydrant", category: "glutes", equipment: "Bodyweight", difficulty: "Beginner", description: "Hip abduction exercise for glute medius activation." },
+  { name: "Glute Kickback", category: "glutes", equipment: "Cable", difficulty: "Intermediate", description: "Cable-based glute isolation with leg extension." },
+  { name: "Sumo Squat", category: "glutes", equipment: "Dumbbell", difficulty: "Beginner", description: "Wide-stance squat emphasizing inner thighs and glutes." },
+  { name: "Reverse Hyperextension", category: "glutes", equipment: "Machine", difficulty: "Intermediate", description: "Posterior chain movement for glutes and lower back." },
+  { name: "Cable Hip Adduction", category: "glutes", equipment: "Cable", difficulty: "Beginner" },
+  { name: "Curtsy Lunge", category: "glutes", equipment: "Dumbbells", difficulty: "Intermediate", description: "Lateral lunge variation targeting glute medius." },
+  // ── Calves (10) ──
+  { name: "Standing Calf Raise", category: "calves", equipment: "Machine", difficulty: "Beginner", description: "Standing calf raise for gastrocnemius development." },
+  { name: "Seated Calf Raise", category: "calves", equipment: "Machine", difficulty: "Beginner", description: "Seated calf raise targeting the soleus muscle." },
+  { name: "Donkey Calf Raise", category: "calves", equipment: "Machine", difficulty: "Intermediate" },
+  { name: "Single-Leg Calf Raise", category: "calves", equipment: "Dumbbell", difficulty: "Intermediate" },
+  { name: "Calf Press on Leg Press", category: "calves", equipment: "Machine", difficulty: "Beginner" },
+  { name: "Jump Rope", category: "calves", equipment: "Rope", difficulty: "Intermediate", description: "Plyometric cardio that builds calf endurance and agility." },
+  { name: "Farmer's Walk on Toes", category: "calves", equipment: "Dumbbells", difficulty: "Intermediate" },
+  { name: "Reverse Calf Raise", category: "calves", equipment: "Bodyweight", difficulty: "Beginner", description: "Targets the anterior tibialis by lifting toes upward." },
+  { name: "Step Calf Raise", category: "calves", equipment: "Bodyweight", difficulty: "Beginner" },
+  { name: "Single-Leg Calf Press", category: "calves", equipment: "Machine", difficulty: "Intermediate", description: "Unilateral calf press for balanced lower leg development." },
+  // ── Shoulders (14) ──
+  { name: "Overhead Press", category: "shoulders", equipment: "Barbell", difficulty: "Intermediate", description: "Standing barbell press for overall shoulder development." },
+  { name: "Seated Dumbbell Press", category: "shoulders", equipment: "Dumbbells", difficulty: "Intermediate" },
+  { name: "Arnold Press", category: "shoulders", equipment: "Dumbbells", difficulty: "Intermediate", description: "Rotational dumbbell press targeting all three deltoid heads." },
+  { name: "Lateral Raise", category: "shoulders", equipment: "Dumbbells", difficulty: "Beginner", description: "Isolation exercise for the lateral deltoid head." },
+  { name: "Front Raise", category: "shoulders", equipment: "Dumbbells", difficulty: "Beginner", description: "Anterior deltoid isolation with dumbbells." },
+  { name: "Reverse Flyes", category: "shoulders", equipment: "Dumbbells", difficulty: "Beginner", description: "Rear delt isolation for balanced shoulder development." },
+  { name: "Upright Row", category: "shoulders", equipment: "Barbell", difficulty: "Intermediate", description: "Vertical pull for traps and deltoids." },
+  { name: "Push Press", category: "shoulders", equipment: "Barbell", difficulty: "Advanced", description: "Overhead press with leg drive for explosive power." },
+  { name: "Landmine Press", category: "shoulders", equipment: "Barbell", difficulty: "Intermediate", description: "Angled press using a landmine attachment for shoulder safety." },
+  { name: "Single-Arm Dumbbell Press", category: "shoulders", equipment: "Dumbbell", difficulty: "Intermediate" },
+  { name: "Plate Front Raise", category: "shoulders", equipment: "Plate", difficulty: "Beginner" },
+  { name: "Cable Lateral Raise", category: "shoulders", equipment: "Cable", difficulty: "Intermediate", description: "Cable-based lateral raise for constant tension." },
+  { name: "Rear Delt Fly", category: "shoulders", equipment: "Machine", difficulty: "Beginner", description: "Machine-based rear delt isolation." },
+  { name: "Face Pull", category: "shoulders", equipment: "Cable", difficulty: "Beginner", description: "Cable pull for rear delts and external rotation." },
+  // ── Biceps (12) ──
+  { name: "Barbell Curl", category: "biceps", equipment: "Barbell", difficulty: "Beginner", description: "Standard barbell curl for bicep mass." },
+  { name: "Dumbbell Curl", category: "biceps", equipment: "Dumbbells", difficulty: "Beginner", description: "Alternating dumbbell curl for bicep development." },
+  { name: "Hammer Curl", category: "biceps", equipment: "Dumbbells", difficulty: "Beginner", description: "Neutral-grip curl targeting brachialis and brachioradialis." },
+  { name: "Incline Dumbbell Curl", category: "biceps", equipment: "Dumbbells", difficulty: "Intermediate", description: "Incline bench curl for stretched bicep contraction." },
+  { name: "Preacher Curl", category: "biceps", equipment: "EZ Bar", difficulty: "Intermediate", description: "Isolated curl on a preacher bench to eliminate momentum." },
+  { name: "Concentration Curl", category: "biceps", equipment: "Dumbbell", difficulty: "Beginner", description: "Seated single-arm curl for peak bicep contraction." },
+  { name: "Cable Curl", category: "biceps", equipment: "Cable", difficulty: "Beginner", description: "Cable bicep curl for constant tension throughout the movement." },
+  { name: "Spider Curl", category: "biceps", equipment: "EZ Bar", difficulty: "Intermediate", description: "Incline prone curl for maximum bicep isolation." },
+  { name: "Reverse Curl", category: "biceps", equipment: "EZ Bar", difficulty: "Intermediate", description: "Overhand grip curl targeting brachioradialis and forearms." },
+  { name: "Zottman Curl", category: "biceps", equipment: "Dumbbells", difficulty: "Intermediate", description: "Curl up with supination, lower with pronation for full arm." },
+  { name: "EZ Bar Curl", category: "biceps", equipment: "EZ Bar", difficulty: "Beginner", description: "EZ bar curl for biceps with reduced wrist strain." },
+  { name: "Cable Hammer Curl", category: "biceps", equipment: "Cable", difficulty: "Intermediate" },
+  // ── Triceps (12) ──
+  { name: "Tricep Pushdown", category: "triceps", equipment: "Cable", difficulty: "Beginner", description: "Straight-bar cable pushdown for tricep isolation." },
+  { name: "Overhead Tricep Extension", category: "triceps", equipment: "Dumbbell", difficulty: "Intermediate", description: "Overhead extension targeting the long head of the tricep." },
+  { name: "Skull Crusher", category: "triceps", equipment: "EZ Bar", difficulty: "Intermediate", description: "Lying tricep extension for all three tricep heads." },
+  { name: "Close-Grip Bench Press", category: "triceps", equipment: "Barbell", difficulty: "Intermediate", description: "Narrow-grip bench press emphasizing tricep strength." },
+  { name: "Diamond Push-up", category: "triceps", equipment: "Bodyweight", difficulty: "Intermediate", description: "Close-hand push-up for intense tricep activation." },
+  { name: "Bench Dip", category: "triceps", equipment: "Bench", difficulty: "Beginner", description: "Bodyweight tricep dip using a bench or chair." },
+  { name: "Tricep Kickback", category: "triceps", equipment: "Dumbbells", difficulty: "Beginner", description: "Bent-over dumbbell extension for tricep isolation." },
+  { name: "French Press", category: "triceps", equipment: "Barbell", difficulty: "Intermediate", description: "Lying tricep extension with a barbell." },
+  { name: "Rope Pushdown", category: "triceps", equipment: "Cable", difficulty: "Beginner", description: "Cable pushdown with rope attachment for full range of motion." },
+  { name: "Single-Arm Tricep Extension", category: "triceps", equipment: "Cable", difficulty: "Beginner" },
+  { name: "Bodyweight Tricep Extension", category: "triceps", equipment: "Bodyweight", difficulty: "Intermediate" },
+  { name: "JM Press", category: "triceps", equipment: "Barbell", difficulty: "Advanced", description: "Hybrid of close-grip bench and skull crusher for tricep mass." },
+  // ── Forearms (10) ──
+  { name: "Wrist Curl", category: "forearms", equipment: "Barbell", difficulty: "Beginner", description: "Barbell wrist curl for forearm flexor development." },
+  { name: "Reverse Wrist Curl", category: "forearms", equipment: "Barbell", difficulty: "Beginner", description: "Barbell wrist extension for forearm extensor development." },
+  { name: "Pinch Grip Hold", category: "forearms", equipment: "Weight Plate", difficulty: "Intermediate", description: "Static hold of smooth plates between fingers and thumb for grip strength." },
+  { name: "Dead Hang", category: "forearms", equipment: "Pull-up Bar", difficulty: "Beginner", description: "Passive hang for grip strength and shoulder health." },
+  { name: "Plate Pinch", category: "forearms", equipment: "Plate", difficulty: "Intermediate", description: "Pinch grip hold using weight plates." },
+  { name: "Wrist Roller", category: "forearms", equipment: "Cable", difficulty: "Intermediate", description: "Rolling weight up and down for comprehensive forearm work." },
+  { name: "Finger Curl", category: "forearms", equipment: "Barbell", difficulty: "Intermediate", description: "Rolling barbell across fingers for deep forearm flexor work." },
+  { name: "Towel Pull-up", category: "forearms", equipment: "Pull-up Bar", difficulty: "Advanced", description: "Pull-up using a towel draped over the bar for grip strength." },
+  { name: "Kettlebell Farmers Carry", category: "forearms", equipment: "Kettlebell", difficulty: "Intermediate" },
+  { name: "Coins Grip Hold", category: "forearms", equipment: "Plate", difficulty: "Intermediate", description: "Holding smooth plates together with fingertips." },
+  // ── Core (14) ──
+  { name: "Plank", category: "core", equipment: "Bodyweight", difficulty: "Beginner", description: "Isometric core hold for overall stability." },
+  { name: "Side Plank", category: "core", equipment: "Bodyweight", difficulty: "Beginner", description: "Lateral core stability exercise." },
+  { name: "Crunch", category: "core", equipment: "Bodyweight", difficulty: "Beginner", description: "Basic spinal flexion for rectus abdominis." },
+  { name: "Bicycle Crunch", category: "core", equipment: "Bodyweight", difficulty: "Beginner", description: "Twisting crunch for oblique and rectus engagement." },
+  { name: "Leg Raise", category: "core", equipment: "Bodyweight", difficulty: "Intermediate", description: "Lying leg raise for lower abdominal activation." },
+  { name: "Hanging Leg Raise", category: "core", equipment: "Pull-up Bar", difficulty: "Advanced", description: "Hanging leg raise for comprehensive core strength." },
+  { name: "Russian Twist", category: "core", equipment: "Bodyweight", difficulty: "Beginner", description: "Rotational core movement for oblique development." },
+  { name: "Hollow Body Hold", category: "core", equipment: "Bodyweight", difficulty: "Beginner", description: "Isometric core hold lying on back with arms and legs extended." },
+  { name: "Ab Roller", category: "core", equipment: "Ab Wheel", difficulty: "Intermediate", description: "Wheel rollout for deep core and anti-extension strength." },
+  { name: "Pallof Press", category: "core", equipment: "Cable", difficulty: "Intermediate", description: "Anti-rotation press for core stability and obliques." },
+  { name: "Dead Bug", category: "core", equipment: "Bodyweight", difficulty: "Beginner", description: "Anti-extension core exercise for spinal stability." },
+  { name: "Toes to Bar", category: "core", equipment: "Pull-up Bar", difficulty: "Advanced", description: "Hanging toes-to-bar for full core flexion." },
+  { name: "V-Up", category: "core", equipment: "Bodyweight", difficulty: "Intermediate", description: "Simultaneous leg and torso raise for rectus abdominis." },
+  { name: "Dragon Flag", category: "core", equipment: "Bench", difficulty: "Advanced", description: "Advanced full-body core exercise popularized by Bruce Lee." },
+  // ── Cardio (14) ──
+  { name: "Running", category: "cardio", equipment: "Treadmill", difficulty: "Beginner", description: "Steady-state running for cardiovascular endurance." },
+  { name: "Cycling", category: "cardio", equipment: "Stationary Bike", difficulty: "Beginner", description: "Low-impact cardio for leg endurance and heart health." },
+  { name: "Rowing Machine", category: "cardio", equipment: "Rower", difficulty: "Beginner", description: "Full-body cardio on the rowing ergometer." },
+  { name: "Burpee", category: "cardio", equipment: "Bodyweight", difficulty: "Intermediate", description: "Full-body explosive movement for high-intensity conditioning." },
+  { name: "Mountain Climber", category: "cardio", equipment: "Bodyweight", difficulty: "Beginner", description: "Dynamic plank variation for cardio and core endurance." },
+  { name: "Battle Ropes", category: "cardio", equipment: "Rope", difficulty: "Intermediate", description: "Heavy rope waves for upper body cardio and conditioning." },
+  { name: "Assault Bike", category: "cardio", equipment: "Assault Bike", difficulty: "Intermediate", description: "Air-resistance bike for full-body HIIT conditioning." },
+  { name: "Jumping Jack", category: "cardio", equipment: "Bodyweight", difficulty: "Beginner" },
+  { name: "High Knees", category: "cardio", equipment: "Bodyweight", difficulty: "Beginner", description: "Explosive running in place for cardio and hip flexor work." },
+  { name: "Star Jump", category: "cardio", equipment: "Bodyweight", difficulty: "Intermediate", description: "Full-body plyometric jump for power and cardio." },
+  { name: "Ski Erg", category: "cardio", equipment: "Ski Erg", difficulty: "Intermediate", description: "Double-pole skiing motion for upper body cardio." },
+  { name: "Stair Climber", category: "cardio", equipment: "Stair Machine", difficulty: "Beginner", description: "Continuous stair stepping for lower body cardio." },
+  { name: "Elliptical Trainer", category: "cardio", equipment: "Elliptical", difficulty: "Beginner", description: "Low-impact full-body cardio machine." },
+  { name: "Shuttle Run", category: "cardio", equipment: "Bodyweight", difficulty: "Intermediate", description: "Back-and-forth sprint drill for agility and conditioning." },
+  // ── Mobility (12) ──
+  { name: "Hip Flexor Stretch", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Kneeling stretch to open tight hip flexors." },
+  { name: "World's Greatest Stretch", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Full-body mobility drill combining lunge, rotation, and hamstring stretch." },
+  { name: "Cat-Cow Stretch", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Spinal mobility movement for warm-up and recovery." },
+  { name: "Thoracic Spine Rotation", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Half-kneeling rotation for upper back mobility." },
+  { name: "Pigeon Pose", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Deep external rotation stretch for the hips and glutes." },
+  { name: "90/90 Stretch", category: "mobility", equipment: "Bodyweight", difficulty: "Intermediate", description: "Hip external and internal rotation mobility drill." },
+  { name: "Ankle Mobility Drill", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Knee-over-toe ankle dorsiflexion mobilization." },
+  { name: "Shoulder Dislocates", category: "mobility", equipment: "PVC Pipe", difficulty: "Intermediate", description: "Band or pipe pass-through for shoulder mobility." },
+  { name: "Deep Squat Hold", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Resting in a deep squat to improve hip and ankle range of motion." },
+  { name: "Lunge With Twist", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Forward lunge combined with thoracic rotation." },
+  { name: "Leg Swings", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Dynamic forward and lateral leg swings for hip mobility." },
+  { name: "Arm Circles", category: "mobility", equipment: "Bodyweight", difficulty: "Beginner", description: "Dynamic shoulder warm-up in forward and backward directions." },
+  // ── Stretching (12) ──
+  { name: "Hamstring Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Seated or standing forward fold for hamstring flexibility." },
+  { name: "Quad Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Standing quad pull for front thigh flexibility." },
+  { name: "Chest Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Doorway or standing pec stretch for chest openness." },
+  { name: "Tricep Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Overhead arm bend for tricep and lat flexibility." },
+  { name: "Shoulder Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Cross-body arm pull for rear delt flexibility." },
+  { name: "Child's Pose", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Resting yoga pose for back and hip relaxation." },
+  { name: "Cobra Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Prone back extension for spinal and abdominal stretch." },
+  { name: "Seated Forward Fold", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Sitting forward bend for hamstring and lower back flexibility." },
+  { name: "Butterfly Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Seated groin stretch with soles of feet together." },
+  { name: "Figure-Four Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Lying or seated glute and piriformis stretch." },
+  { name: "Neck Side Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Lateral neck tilt for sternocleidomastoid stretch." },
+  { name: "Wrist Flexor Stretch", category: "stretching", equipment: "Bodyweight", difficulty: "Beginner", description: "Extended arm with palm up and fingers pulled back." },
+  // ── Neck (10) ──
+  { name: "Neck Flexion", category: "neck", equipment: "Bodyweight", difficulty: "Beginner", description: "Chin-to-chest movement for neck flexor strengthening." },
+  { name: "Neck Extension", category: "neck", equipment: "Bodyweight", difficulty: "Beginner", description: "Looking upward for neck extensor strengthening." },
+  { name: "Neck Lateral Flexion", category: "neck", equipment: "Bodyweight", difficulty: "Beginner", description: "Side-to-side neck tilt for lateral neck muscles." },
+  { name: "Neck Rotation", category: "neck", equipment: "Bodyweight", difficulty: "Beginner", description: "Turning head side to side for rotational neck mobility." },
+  { name: "Isometric Neck Hold", category: "neck", equipment: "Bodyweight", difficulty: "Beginner", description: "Hand-resisted neck presses for isometric strength." },
+  { name: "Neck Strap Flexion", category: "neck", equipment: "Weight Plate", difficulty: "Intermediate", description: "Weighted neck flexion using a neck harness." },
+  { name: "Neck Strap Extension", category: "neck", equipment: "Weight Plate", difficulty: "Intermediate", description: "Weighted neck extension using a neck harness." },
+  { name: "Plate Loaded Neck Flexion", category: "neck", equipment: "Weight Plate", difficulty: "Intermediate", description: "Lying neck flexion with plate on forehead." },
+  { name: "Lying Neck Extension", category: "neck", equipment: "Bodyweight", difficulty: "Beginner", description: "Prone neck lift for extensor endurance." },
+  { name: "Side Lying Neck Raise", category: "neck", equipment: "Bodyweight", difficulty: "Beginner", description: "Side-lying lateral neck flexion against gravity." },
+  // ── Full Body (14) ──
+  { name: "Clean and Jerk", category: "full-body", equipment: "Barbell", difficulty: "Advanced", description: "Olympic weightlifting movement for explosive full-body power." },
+  { name: "Snatch", category: "full-body", equipment: "Barbell", difficulty: "Advanced", description: "Overhead squat catch from the floor — peak explosive lift." },
+  { name: "Squat Clean", category: "full-body", equipment: "Barbell", difficulty: "Advanced", description: "Clean variation receiving the bar in a full squat." },
+  { name: "Thruster", category: "full-body", equipment: "Barbell", difficulty: "Intermediate", description: "Front squat to overhead press in one fluid movement." },
+  { name: "Wall Ball", category: "full-body", equipment: "Medicine Ball", difficulty: "Intermediate", description: "Squat to overhead throw for full-body conditioning." },
+  { name: "Dumbbell Snatch", category: "full-body", equipment: "Dumbbell", difficulty: "Intermediate", description: "Single-arm explosive pull from floor to overhead." },
+  { name: "Turkish Get-Up", category: "full-body", equipment: "Kettlebell", difficulty: "Advanced", description: "Complex movement from floor to standing with a weight overhead." },
+  { name: "Bear Crawl", category: "full-body", equipment: "Bodyweight", difficulty: "Intermediate", description: "Quadrupedal crawling for full-body coordination and endurance." },
+  { name: "Power Clean", category: "full-body", equipment: "Barbell", difficulty: "Advanced", description: "Explosive pull from floor to front rack position for full-body power." },
+  { name: "Kettlebell Swing", category: "full-body", equipment: "Kettlebell", difficulty: "Intermediate", description: "Hip-driven swing for posterior chain power and conditioning." },
+  { name: "Medicine Ball Slam", category: "full-body", equipment: "Medicine Ball", difficulty: "Intermediate", description: "Overhead slam for explosive power and core engagement." },
+  { name: "Farmer's Walk", category: "full-body", equipment: "Dumbbells", difficulty: "Intermediate", description: "Loaded carry for grip strength, core stability, and conditioning." },
+  { name: "Sled Drag", category: "full-body", equipment: "Sled", difficulty: "Intermediate", description: "Dragging a weighted sled backward or forward for full-body conditioning." },
+  { name: "Sled Push", category: "full-body", equipment: "Sled", difficulty: "Intermediate", description: "Pushing a weighted sled for explosive leg drive and conditioning." },
+];
+
+const categoryMuscles = {
+  chest: ["Pectoralis Major", "Pectoralis Minor", "Anterior Deltoid"],
+  back: ["Latissimus Dorsi", "Trapezius", "Rhomboids", "Erector Spinae"],
+  legs: ["Quadriceps", "Hamstrings", "Gluteus Maximus", "Calves"],
+  glutes: ["Gluteus Maximus", "Gluteus Medius", "Gluteus Minimus"],
+  calves: ["Gastrocnemius", "Soleus"],
+  shoulders: ["Deltoid (Anterior)", "Deltoid (Lateral)", "Deltoid (Posterior)", "Trapezius"],
+  biceps: ["Biceps Brachii", "Brachialis", "Brachioradialis"],
+  triceps: ["Triceps Brachii"],
+  forearms: ["Brachioradialis", "Flexor Carpi", "Extensor Carpi"],
+  core: ["Rectus Abdominis", "Transverse Abdominis", "Obliques", "Erector Spinae"],
+  cardio: ["Heart", "Lungs", "Full Body"],
+  mobility: ["Hip Flexors", "Thoracic Spine", "Ankles", "Shoulders"],
+  stretching: ["Hamstrings", "Quadriceps", "Hip Flexors", "Chest", "Back"],
+  neck: ["Sternocleidomastoid", "Scalenes", "Trapezius (Upper)"],
+  "full-body": ["Full Body"],
+};
+
+const detailedExercises = {
+  "Bench Press": {
+    instructions: "1. Lie flat on a bench with feet on the floor.\n2. Grip the bar slightly wider than shoulder-width.\n3. Unrack the bar and lower it to your mid-chest.\n4. Press the bar back up until arms are fully extended.\n5. Repeat.",
+    tips: "Keep your shoulder blades retracted throughout the movement. Avoid bouncing the bar off your chest.",
+    commonMistakes: "Flaring elbows too wide. Bouncing the bar. Lifting your glutes off the bench.",
+  },
+  "Deadlift": {
+    instructions: "1. Stand with feet hip-width apart, bar over midfoot.\n2. Hinge at hips and grip the bar.\n3. Keep your back straight and chest up.\n4. Drive through your heels and stand up with the bar.\n5. Lower under control.",
+    tips: "Keep the bar close to your body throughout. Brace your core before every rep.",
+    commonMistakes: "Rounding the lower back. Jerking the bar off the floor. Not using leg drive.",
+  },
+  "Barbell Back Squat": {
+    instructions: "1. Position the bar on your upper back.\n2. Unrack and step back.\n3. Descend by bending knees and hips simultaneously.\n4. Go to at least parallel depth.\n5. Drive up through your midfoot.",
+    tips: "Keep your chest up and knees tracking over toes. Maintain a neutral spine.",
+    commonMistakes: "Letting knees cave in. Coming up on your toes. Not reaching depth.",
+  },
+  "Pull-up": {
+    instructions: "1. Grip the bar with palms facing away, hands shoulder-width.\n2. Hang with arms fully extended.\n3. Pull yourself up until your chin clears the bar.\n4. Lower under control to full hang.\n5. Repeat.",
+    tips: "Initiate the pull by driving your elbows down. Avoid kipping if strict form is the goal.",
+    commonMistakes: "Not reaching full extension at the bottom. Using too much momentum.",
+  },
+};
+
+function enrichExercise(ex) {
+  const muscles = categoryMuscles[ex.category];
+  const details = detailedExercises[ex.name];
+  return {
+    ...ex,
+    primaryMuscles: muscles ? muscles.slice(0, 3) : null,
+    secondaryMuscles: muscles && muscles.length > 3 ? muscles.slice(3) : null,
+    instructions: details?.instructions || null,
+    tips: details?.tips || null,
+    commonMistakes: details?.commonMistakes || null,
+  };
+}
+
 async function main() {
   console.log("=== La Traino Seed ===\n");
 
@@ -621,6 +881,14 @@ async function main() {
     await prisma.globalWorkoutPreset.create({ data: preset });
   }
   console.log(`  ${globalWorkoutPresets.length} global workout presets created`);
+
+  // ---- Exercise Library ----
+  console.log("\nCreating exercise library...");
+  await prisma.exercise.deleteMany();
+  for (const ex of exerciseData) {
+    await prisma.exercise.create({ data: enrichExercise(ex) });
+  }
+  console.log(`  ${exerciseData.length} individual exercises created`);
 
   console.log("\n=== Seed complete! ===");
   console.log("Admin:    admin@latraino.com / admin123");

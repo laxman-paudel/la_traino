@@ -25,6 +25,13 @@ const WorkoutPresets = lazy(() => import("./pages/trainer/WorkoutPresets"));
 const DietPresets = lazy(() => import("./pages/trainer/DietPresets"));
 const History = lazy(() => import("./pages/trainer/History"));
 const Analytics = lazy(() => import("./pages/trainer/Analytics"));
+const ExerciseLibrary = lazy(() => import("./pages/trainer/ExerciseLibrary"));
+const WorkoutTemplatesPage = lazy(() => import("./pages/trainer/WorkoutTemplates"));
+const FoodLibrary = lazy(() => import("./pages/trainer/FoodLibrary"));
+const DietTemplatesPage = lazy(() => import("./pages/trainer/DietTemplates"));
+const CoachingHubPage = lazy(() => import("./pages/trainer/CoachingHub"));
+const ExerciseHistoryPage = lazy(() => import("./pages/trainee/ExerciseHistory"));
+const TraineeExerciseHistoryPage = lazy(() => import("./pages/trainer/TraineeExerciseHistory"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const AdminUsers = lazy(() => import("./pages/admin/Users"));
 const AdminPresets = lazy(() => import("./pages/admin/Presets"));
@@ -96,6 +103,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/trainee/exercise-history/:exerciseName"
+                  element={
+                    <ProtectedRoute roles={["TRAINEE"]}>
+                      <AppLayout><ExerciseHistoryPage /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/trainer/dashboard"
                   element={
                     <ProtectedRoute roles={["TRAINER"]}>
@@ -156,6 +171,54 @@ function App() {
                   element={
                     <ProtectedRoute roles={["TRAINER"]}>
                       <AppLayout><History /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/exercises"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><ExerciseLibrary /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/templates"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><WorkoutTemplatesPage /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/foods"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><FoodLibrary /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/diet-templates"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><DietTemplatesPage /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/coaching"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><CoachingHubPage /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/trainees/:id/exercise-history/:exerciseName"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><TraineeExerciseHistoryPage /></AppLayout>
                     </ProtectedRoute>
                   }
                 />

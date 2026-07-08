@@ -280,13 +280,18 @@ async function getFeedback(trainerId, traineeId) {
 
   const feedback = await prisma.feedback.findMany({
     where: { trainerId, traineeId },
-    orderBy: { weekStart: "desc" },
-    select: { weekStart: true, message: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, weekStart: true, message: true, title: true, priority: true, category: true, read: true, createdAt: true },
   });
 
   return feedback.map((f) => ({
-    weekStart: f.weekStart.toISOString().split("T")[0],
+    id: f.id,
+    weekStart: f.weekStart?.toISOString().split("T")[0] ?? null,
     message: f.message,
+    title: f.title,
+    priority: f.priority,
+    category: f.category,
+    read: f.read,
     createdAt: f.createdAt.toISOString(),
   }));
 }
@@ -405,12 +410,6 @@ async function giveFeedback(trainerId, traineeId, body) {
     throw Object.assign(new Error("Message is required"), { status: 400 });
   }
 
-  if (!weekStart || isNaN(new Date(weekStart).getTime())) {
-    throw Object.assign(new Error("Valid weekStart date is required."), {
-      status: 400,
-    });
-  }
-
   const trainee = await prisma.user.findUnique({
     where: { id: traineeId },
     select: { id: true, role: true },
@@ -431,18 +430,11 @@ async function giveFeedback(trainerId, traineeId, body) {
     });
   }
 
-  const weekStartDate = new Date(weekStart);
+  const weekStartDate = weekStart && !isNaN(new Date(weekStart).getTime())
+    ? new Date(weekStart) : new Date();
 
-  const result = await prisma.feedback.upsert({
-    where: {
-      trainerId_traineeId_weekStart: {
-        trainerId,
-        traineeId,
-        weekStart: weekStartDate,
-      },
-    },
-    update: { message: message.trim() },
-    create: {
+  const result = await prisma.feedback.create({
+    data: {
       trainerId,
       traineeId,
       weekStart: weekStartDate,
@@ -451,6 +443,7 @@ async function giveFeedback(trainerId, traineeId, body) {
   });
 
   return {
+    id: result.id,
     weekStart: result.weekStart.toISOString().split("T")[0],
     message: result.message,
     createdAt: result.createdAt.toISOString(),

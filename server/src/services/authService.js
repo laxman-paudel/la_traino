@@ -20,6 +20,7 @@ const USER_SELECT = {
   email: true,
   role: true,
   authProvider: true,
+  profileImage: true,
   isActive: true,
   createdAt: true,
   updatedAt: true,
@@ -156,7 +157,7 @@ async function googleAuth({ credentialToken, role }) {
     });
   }
 
-  const { email, name, sub: googleId } = payload;
+  const { email, name, sub: googleId, picture } = payload;
 
   let user = await prisma.user.findUnique({
     where: { googleId },
@@ -175,7 +176,7 @@ async function googleAuth({ credentialToken, role }) {
 
   const existingByEmail = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, isActive: true },
+    select: { id: true, authProvider: true, isActive: true },
   });
 
   if (existingByEmail) {
@@ -183,6 +184,13 @@ async function googleAuth({ credentialToken, role }) {
       throw Object.assign(new Error("Account has been disabled"), {
         status: 401,
       });
+    }
+
+    if (existingByEmail.authProvider !== "GOOGLE") {
+      throw Object.assign(
+        new Error("This email already belongs to an existing account. Please sign in with your email and password."),
+        { status: 409 },
+      );
     }
 
     user = await prisma.user.update({
@@ -207,6 +215,7 @@ async function googleAuth({ credentialToken, role }) {
       name,
       email,
       googleId,
+      profileImage: picture || null,
       role: normalizedRole,
       authProvider: "GOOGLE",
       trainerProfile:

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getWorkoutLogs } from "../../api/trainer";
+import StatusBadge from "../../components/StatusBadge";
 
 export default function TraineeLogs() {
   const { id } = useParams();
@@ -65,15 +66,9 @@ export default function TraineeLogs() {
                   <p className="text-lg font-semibold text-gray-900">
                     {log.day}
                   </p>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      log.completed
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
+                  <StatusBadge variant={log.completed ? "success" : "warning"}>
                     {log.completed ? "Completed" : "Not Completed"}
-                  </span>
+                  </StatusBadge>
                 </div>
                 <div className="flex gap-4 text-sm">
                   <div className="bg-gray-50 rounded-lg px-3 py-2">
