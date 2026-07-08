@@ -21,9 +21,14 @@ const AssignWorkout = lazy(() => import("./pages/trainer/AssignWorkout"));
 const AssignDiet = lazy(() => import("./pages/trainer/AssignDiet"));
 const TraineeLogs = lazy(() => import("./pages/trainer/TraineeLogs"));
 const Feedback = lazy(() => import("./pages/trainer/Feedback"));
+const WorkoutPresets = lazy(() => import("./pages/trainer/WorkoutPresets"));
+const DietPresets = lazy(() => import("./pages/trainer/DietPresets"));
+const History = lazy(() => import("./pages/trainer/History"));
+const Analytics = lazy(() => import("./pages/trainer/Analytics"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const AdminUsers = lazy(() => import("./pages/admin/Users"));
 const AdminPresets = lazy(() => import("./pages/admin/Presets"));
+const AdminGlobalPresets = lazy(() => import("./pages/admin/GlobalPresets"));
 
 function App() {
   return (
@@ -131,6 +136,38 @@ function App() {
                   }
                 />
                 <Route
+                  path="/trainer/presets/workout"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><WorkoutPresets /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/presets/diet"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><DietPresets /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/history"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><History /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/analytics"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><Analytics /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/admin/users"
                   element={
                     <ProtectedRoute roles={["ADMIN"]}>
@@ -143,6 +180,14 @@ function App() {
                   element={
                     <ProtectedRoute roles={["ADMIN"]}>
                       <AppLayout><AdminPresets /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/global-presets"
+                  element={
+                    <ProtectedRoute roles={["ADMIN"]}>
+                      <AppLayout><AdminGlobalPresets /></AppLayout>
                     </ProtectedRoute>
                   }
                 />

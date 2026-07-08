@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDashboard, getWorkoutLogs } from "../../api/trainer";
 import { useAuth } from "../../context/AuthContext";
@@ -7,6 +7,7 @@ import { SkeletonStatCard, SkeletonCard } from "../../components/Skeleton";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import Pagination from "../../components/Pagination";
+import BulkAssignModal from "../../components/BulkAssignModal";
 
 const PAGE_SIZE = 6;
 
@@ -49,8 +50,7 @@ const FILTERS = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },
   { value: "completed-today", label: "Completed Today" },
-  { value: "needs-workout", label: "Needs Workout" },
-  { value: "needs-diet", label: "Needs Diet" },
+  { value: "needs-workout", label: "Needs Preset" },
 ];
 
 export default function TrainerDashboard() {
@@ -63,6 +63,32 @@ export default function TrainerDashboard() {
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [bulkModal, setBulkModal] = useState({ open: false, type: "workout" });
+
+  const toggleSelection = useCallback((id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const selectAll = useCallback(() => {
+    setSelectedIds(new Set(filtered.map((t) => t.id)));
+  }, [filtered]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every((t) => selectedIds.has(t.id));
+  const hasSelection = selectedIds.size > 0;
+  const selectedTrainees = useMemo(
+    () => filtered.filter((t) => selectedIds.has(t.id)),
+    [filtered, selectedIds],
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -150,8 +176,6 @@ export default function TrainerDashboard() {
         break;
       case "needs-workout":
         result = result.filter((t) => !t.preset);
-        break;
-      case "needs-diet":
         break;
     }
     return result;
@@ -251,7 +275,15 @@ export default function TrainerDashboard() {
       <div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-900">Linked Trainees</h2>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={allFilteredSelected}
+                onChange={() => (allFilteredSelected ? clearSelection() : selectAll())}
+                className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <h2 className="text-xl font-bold text-gray-900">Linked Trainees</h2>
+            </label>
             {trainees.length > 0 && (
               <span className="text-sm text-gray-500">({trainees.length})</span>
             )}
@@ -274,6 +306,37 @@ export default function TrainerDashboard() {
           </div>
         </div>
 
+        {hasSelection && (
+          <div className="mb-4 flex items-center gap-3 bg-indigo-50 border border-indigo-100 rounded-xl p-3">
+            <span className="text-sm font-medium text-indigo-700">
+              {selectedIds.size} trainee{selectedIds.size > 1 ? "s" : ""} selected
+            </span>
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="text-xs text-indigo-500 hover:text-indigo-700 font-medium"
+            >
+              Clear selection
+            </button>
+            <div className="ml-auto flex gap-2">
+              <button
+                type="button"
+                onClick={() => setBulkModal({ open: true, type: "workout" })}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-semibold"
+              >
+                Assign Workout
+              </button>
+              <button
+                type="button"
+                onClick={() => setBulkModal({ open: true, type: "diet" })}
+                className="px-4 py-2 border border-indigo-300 text-indigo-600 rounded-xl hover:bg-indigo-100 transition text-sm font-semibold"
+              >
+                Assign Diet
+              </button>
+            </div>
+          </div>
+        )}
+
         {filtered.length === 0 ? (
           <EmptyState
             icon="users"
@@ -282,24 +345,37 @@ export default function TrainerDashboard() {
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
-            {paged.map((trainee) => {
-              const p = trainee.progress;
-              const latestDate = p.latestLog?.day
-                ? new Date(p.latestLog.day).toLocaleDateString()
-                : null;
+              {paged.map((trainee) => {
+                const p = trainee.progress;
+                const latestDate = p.latestLog?.day
+                  ? new Date(p.latestLog.day).toLocaleDateString()
+                  : null;
+                const isSelected = selectedIds.has(trainee.id);
 
-              return (
-                <div
-                  key={trainee.id}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">
-                        {trainee.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 truncate">{trainee.email}</p>
-                    </div>
+                return (
+                  <div
+                    key={trainee.id}
+                    className={`bg-white rounded-2xl shadow-sm border p-5 transition ${
+                      isSelected
+                        ? "border-indigo-300 ring-1 ring-indigo-200"
+                        : "border-gray-100 hover:shadow-md"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="min-w-0 flex items-center gap-2.5">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelection(trainee.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 shrink-0"
+                        />
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 truncate">
+                            {trainee.name}
+                          </h3>
+                          <p className="text-sm text-gray-500 truncate">{trainee.email}</p>
+                        </div>
+                      </div>
                     <div className="flex gap-1.5 shrink-0 flex-wrap justify-end">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-medium">
                         <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
@@ -410,6 +486,16 @@ export default function TrainerDashboard() {
 
         <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
+
+      <BulkAssignModal
+        isOpen={bulkModal.open}
+        onClose={() => {
+          setBulkModal({ open: false, type: "workout" });
+          clearSelection();
+        }}
+        type={bulkModal.type}
+        trainees={selectedTrainees}
+      />
     </div>
   );
 }

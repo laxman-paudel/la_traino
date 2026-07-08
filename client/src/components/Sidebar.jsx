@@ -2,6 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const icons = {
+  Analytics: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+    </svg>
+  ),
   Dashboard: (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -39,9 +44,14 @@ const ROLE_GROUPS = {
     { label: "Dashboard", path: "/admin/dashboard", icon: "Dashboard" },
     { label: "Users", path: "/admin/users", icon: "Users" },
     { label: "Presets", path: "/admin/presets", icon: "Presets" },
+    { label: "Global Library", path: "/admin/global-presets", icon: "Analytics" },
   ],
   TRAINER: [
     { label: "Dashboard", path: "/trainer/dashboard", icon: "Dashboard" },
+    { label: "Workout Presets", path: "/trainer/presets/workout", icon: "Workout" },
+    { label: "Diet Presets", path: "/trainer/presets/diet", icon: "Presets" },
+    { label: "History", path: "/trainer/history", icon: "Progress" },
+    { label: "Analytics", path: "/trainer/analytics", icon: "Analytics" },
   ],
 };
 

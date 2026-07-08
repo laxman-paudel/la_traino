@@ -41,6 +41,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { user, loginAction, isAuthenticated } = useAuth();
   const googleInitRef = useRef(false);
+  const googleEnabled = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,7 +50,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated || !window.google || googleInitRef.current) return;
+    if (isAuthenticated || !window.google || googleInitRef.current || !googleEnabled) return;
     googleInitRef.current = true;
 
     window.google.accounts.id.initialize({
@@ -228,16 +229,19 @@ export default function Login() {
               </button>
             </form>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-sm text-gray-400">or continue with</span>
-              </div>
-            </div>
-
-            <div id="google-login-button" className="flex justify-center" />
+            {googleEnabled && (
+              <>
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-white px-3 text-sm text-gray-400">or continue with</span>
+                  </div>
+                </div>
+                <div id="google-login-button" className="flex justify-center" />
+              </>
+            )}
 
             <p className="mt-6 text-center text-sm text-gray-500">
               Don&apos;t have an account?{" "}

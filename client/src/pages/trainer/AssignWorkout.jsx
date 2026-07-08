@@ -1,31 +1,42 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { assignWorkout } from "../../api/trainer";
+import { getWorkoutPresets } from "../../api/trainerPresets";
 import { useToast } from "../../context/ToastContext";
 import PageHeader from "../../components/PageHeader";
 
 const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
+  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
 ];
 
 export default function AssignWorkout() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { state: locationState } = useLocation();
   const { addToast } = useToast();
 
-  const [day, setDay] = useState("");
-  const [exercises, setExercises] = useState([
-    { name: "", sets: "", reps: "" },
-  ]);
+  const [mode, setMode] = useState("custom");
+  const [presets, setPresets] = useState([]);
+  const [presetsLoading, setPresetsLoading] = useState(false);
+
+  const [day, setDay] = useState(locationState?.prefillDay || "");
+  const [exercises, setExercises] = useState(
+    locationState?.prefillExercises || [
+      { name: "", sets: "", reps: "" },
+    ],
+  );
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (mode !== "preset") return;
+    setPresetsLoading(true);
+    getWorkoutPresets()
+      .then((res) => setPresets(res.data))
+      .catch(() => {})
+      .finally(() => setPresetsLoading(false));
+  }, [mode]);
 
   function handleExerciseChange(index, field, value) {
     setExercises((prev) =>
@@ -39,6 +50,16 @@ export default function AssignWorkout() {
 
   function removeExercise(index) {
     setExercises((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function loadPreset(preset) {
+    setExercises(
+      preset.exercises.map((ex) => ({
+        name: ex.name,
+        sets: ex.sets.toString(),
+        reps: ex.reps.toString(),
+      })),
+    );
   }
 
   function validate() {
@@ -93,11 +114,68 @@ export default function AssignWorkout() {
         subtitle="Create a workout plan for this trainee"
       />
 
-      {error && (
-        <div
-          role="alert"
-          className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2.5"
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => { setMode("custom"); setExercises([{ name: "", sets: "", reps: "" }]); }}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+            mode === "custom"
+              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
         >
+          Create Custom
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("preset")}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+            mode === "preset"
+              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Use Preset
+        </button>
+      </div>
+
+      {mode === "preset" && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Select a Preset</h2>
+          {presetsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
+            </div>
+          ) : presets.length === 0 ? (
+            <p className="text-sm text-gray-500 text-center py-4">
+              No workout presets yet.{" "}
+              <button type="button" onClick={() => navigate("/trainer/presets/workout")}
+                className="text-indigo-600 hover:text-indigo-700 font-medium">Create one</button>.
+            </p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {presets.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => loadPreset(p)}
+                  className="text-left border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:bg-indigo-50/50 transition"
+                >
+                  <p className="text-sm font-semibold text-gray-900">{p.name}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {Array.isArray(p.exercises) ? p.exercises.length : 0} exercises
+                    {p.difficulty ? ` · ${p.difficulty}` : ""}
+                    {p.estimatedDuration ? ` · ~${p.estimatedDuration}min` : ""}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <div role="alert" className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2.5">
           <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
           </svg>
@@ -191,57 +269,37 @@ export default function AssignWorkout() {
                         type="text"
                         placeholder="e.g. Bench Press"
                         value={exercise.name}
-                        onChange={(e) =>
-                          handleExerciseChange(index, "name", e.target.value)
-                        }
+                        onChange={(e) => handleExerciseChange(index, "name", e.target.value)}
                         className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 ${
                           exErr?.name ? "border-red-300 bg-red-50" : "border-gray-300"
                         }`}
                       />
-                      {exErr?.name && (
-                        <p className="mt-1 text-xs text-red-500">{exErr.name}</p>
-                      )}
+                      {exErr?.name && <p className="mt-1 text-xs text-red-500">{exErr.name}</p>}
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">
-                          Sets <span className="text-red-400">*</span>
-                        </label>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Sets <span className="text-red-400">*</span></label>
                         <input
-                          type="number"
-                          min="1"
-                          placeholder="4"
+                          type="number" min="1" placeholder="4"
                           value={exercise.sets}
-                          onChange={(e) =>
-                            handleExerciseChange(index, "sets", e.target.value)
-                          }
+                          onChange={(e) => handleExerciseChange(index, "sets", e.target.value)}
                           className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 ${
                             exErr?.sets ? "border-red-300 bg-red-50" : "border-gray-300"
                           }`}
                         />
-                        {exErr?.sets && (
-                          <p className="mt-1 text-xs text-red-500">{exErr.sets}</p>
-                        )}
+                        {exErr?.sets && <p className="mt-1 text-xs text-red-500">{exErr.sets}</p>}
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">
-                          Reps <span className="text-red-400">*</span>
-                        </label>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Reps <span className="text-red-400">*</span></label>
                         <input
-                          type="number"
-                          min="1"
-                          placeholder="10"
+                          type="number" min="1" placeholder="10"
                           value={exercise.reps}
-                          onChange={(e) =>
-                            handleExerciseChange(index, "reps", e.target.value)
-                          }
+                          onChange={(e) => handleExerciseChange(index, "reps", e.target.value)}
                           className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 ${
                             exErr?.reps ? "border-red-300 bg-red-50" : "border-gray-300"
                           }`}
                         />
-                        {exErr?.reps && (
-                          <p className="mt-1 text-xs text-red-500">{exErr.reps}</p>
-                        )}
+                        {exErr?.reps && <p className="mt-1 text-xs text-red-500">{exErr.reps}</p>}
                       </div>
                     </div>
                   </div>

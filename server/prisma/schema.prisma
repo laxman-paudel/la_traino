@@ -40,6 +40,8 @@ model User {
   dietPlansAsTrainee        DietPlan[]        @relation("DietPlanTrainee")
   feedbackGiven             Feedback[]        @relation("FeedbackGiven")
   feedbackReceived          Feedback[]        @relation("FeedbackReceived")
+  workoutPresets            TrainerWorkoutPreset[]
+  dietPresets               TrainerDietPreset[]
 }
 
 model TrainerProfile {
@@ -178,4 +180,59 @@ model Feedback {
 
   @@unique([trainerId, traineeId, weekStart])
   @@index([traineeId])
+}
+
+model TrainerWorkoutPreset {
+  id               Int      @id @default(autoincrement())
+  trainerId        Int
+  name             String
+  description      String?
+  difficulty       String?
+  estimatedDuration Int?
+  exercises        Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  trainer User @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId])
+}
+
+model TrainerDietPreset {
+  id          Int      @id @default(autoincrement())
+  trainerId   Int
+  name        String
+  description String?
+  meals       Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trainer User @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId])
+}
+
+model GlobalWorkoutPreset {
+  id               Int      @id @default(autoincrement())
+  name             String
+  description      String?
+  category         String?
+  difficulty       String?
+  tags             Json?
+  exercises        Json
+  estimatedDuration Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model GlobalDietPreset {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  category    String?
+  difficulty  String?
+  tags        Json?
+  meals       Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

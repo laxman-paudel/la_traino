@@ -1,20 +1,13 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { assignDiet } from "../../api/trainer";
+import { getDietPresets } from "../../api/trainerPresets";
 import { useToast } from "../../context/ToastContext";
 import PageHeader from "../../components/PageHeader";
 
 const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
+  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
 ];
-
-const MEAL_TIMES = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
 function FoodChips({ items }) {
   const parsed = items
@@ -39,13 +32,29 @@ function FoodChips({ items }) {
 export default function AssignDiet() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { state: locationState } = useLocation();
   const { addToast } = useToast();
 
-  const [day, setDay] = useState("");
-  const [meals, setMeals] = useState([{ time: "", items: "" }]);
+  const [mode, setMode] = useState("custom");
+  const [presets, setPresets] = useState([]);
+  const [presetsLoading, setPresetsLoading] = useState(false);
+
+  const [day, setDay] = useState(locationState?.prefillDay || "");
+  const [meals, setMeals] = useState(
+    locationState?.prefillMeals || [{ time: "", items: "" }],
+  );
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (mode !== "preset") return;
+    setPresetsLoading(true);
+    getDietPresets()
+      .then((res) => setPresets(res.data))
+      .catch(() => {})
+      .finally(() => setPresetsLoading(false));
+  }, [mode]);
 
   function handleMealChange(index, field, value) {
     setMeals((prev) =>
@@ -61,16 +70,29 @@ export default function AssignDiet() {
     setMeals((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function loadPreset(preset) {
+    setMeals(
+      preset.meals.map((m) => ({
+        time: m.time,
+        items: Array.isArray(m.items) ? m.items.join(", ") : "",
+      })),
+    );
+  }
+
   function validate() {
     const errs = {};
     if (!day.trim()) errs.day = "Please select a day";
     if (meals.length === 0) errs.meals = "At least one meal is required";
     const mealErrors = [];
     for (let i = 0; i < meals.length; i++) {
-      const meal = meals[i];
+      const m = meals[i];
       const fields = {};
-      if (!meal.time) fields.time = "Required";
-      if (!meal.items.trim()) fields.items = "At least one food item required";
+      if (!m.time.trim()) fields.time = "Meal time is required";
+      const items = m.items
+        .split(",")
+        .map((i) => i.trim())
+        .filter(Boolean);
+      if (items.length === 0) fields.items = "At least one food item";
       mealErrors[i] = Object.keys(fields).length > 0 ? fields : null;
     }
     if (mealErrors.some((e) => e !== null)) {
@@ -114,11 +136,66 @@ export default function AssignDiet() {
         subtitle="Create a diet plan for this trainee"
       />
 
-      {error && (
-        <div
-          role="alert"
-          className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2.5"
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => { setMode("custom"); setMeals([{ time: "", items: "" }]); }}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+            mode === "custom"
+              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
         >
+          Create Custom
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("preset")}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+            mode === "preset"
+              ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Use Preset
+        </button>
+      </div>
+
+      {mode === "preset" && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Select a Preset</h2>
+          {presetsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
+            </div>
+          ) : presets.length === 0 ? (
+            <p className="text-sm text-gray-500 text-center py-4">
+              No diet presets yet.{" "}
+              <button type="button" onClick={() => navigate("/trainer/presets/diet")}
+                className="text-indigo-600 hover:text-indigo-700 font-medium">Create one</button>.
+            </p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {presets.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => loadPreset(p)}
+                  className="text-left border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:bg-indigo-50/50 transition"
+                >
+                  <p className="text-sm font-semibold text-gray-900">{p.name}</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {Array.isArray(p.meals) ? p.meals.length : 0} meals
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <div role="alert" className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-2.5">
           <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
           </svg>
@@ -167,7 +244,7 @@ export default function AssignDiet() {
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
+                </svg>
               Add Meal
             </button>
           </div>
@@ -181,14 +258,9 @@ export default function AssignDiet() {
                   className="border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center text-sm font-bold">
-                        {index + 1}
-                      </span>
-                      <span className="text-sm font-semibold text-gray-700">
-                        Meal {index + 1}
-                      </span>
-                    </div>
+                    <span className="text-sm font-semibold text-gray-700">
+                      Meal {index + 1}
+                    </span>
                     {meals.length > 1 && (
                       <button
                         type="button"
@@ -208,23 +280,16 @@ export default function AssignDiet() {
                       <label className="block text-xs font-medium text-gray-500 mb-1">
                         Meal Time <span className="text-red-400">*</span>
                       </label>
-                      <select
+                      <input
+                        type="text"
+                        placeholder="e.g. Breakfast, Lunch, Dinner"
                         value={meal.time}
-                        onChange={(e) =>
-                          handleMealChange(index, "time", e.target.value)
-                        }
-                        className={`w-full max-w-xs px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 ${
+                        onChange={(e) => handleMealChange(index, "time", e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 ${
                           mErr?.time ? "border-red-300 bg-red-50" : "border-gray-300"
                         }`}
-                      >
-                        <option value="">Select time</option>
-                        {MEAL_TIMES.map((t) => (
-                          <option key={t} value={t}>{t}</option>
-                        ))}
-                      </select>
-                      {mErr?.time && (
-                        <p className="mt-1 text-xs text-red-500">{mErr.time}</p>
-                      )}
+                      />
+                      {mErr?.time && <p className="mt-1 text-xs text-red-500">{mErr.time}</p>}
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-500 mb-1">
@@ -234,20 +299,13 @@ export default function AssignDiet() {
                         type="text"
                         placeholder="Oats, Banana, Milk"
                         value={meal.items}
-                        onChange={(e) =>
-                          handleMealChange(index, "items", e.target.value)
-                        }
+                        onChange={(e) => handleMealChange(index, "items", e.target.value)}
                         className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 ${
                           mErr?.items ? "border-red-300 bg-red-50" : "border-gray-300"
                         }`}
                       />
-                      {mErr?.items && (
-                        <p className="mt-1 text-xs text-red-500">{mErr.items}</p>
-                      )}
-                      <p className="mt-1 text-xs text-gray-400">
-                        Separate items with commas
-                      </p>
                       <FoodChips items={meal.items} />
+                      {mErr?.items && <p className="mt-1 text-xs text-red-500">{mErr.items}</p>}
                     </div>
                   </div>
                 </div>
