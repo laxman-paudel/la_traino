@@ -19,7 +19,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex items-center justify-center flex-1">
         <div className="animate-spin h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full" />
       </div>
     );
@@ -33,7 +33,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-10">
+    <div className="px-4 py-10">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Admin Dashboard

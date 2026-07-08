@@ -101,6 +101,19 @@ export default function TraineeDashboard() {
             </button>
           </>
         )}
+
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <p className="text-sm text-gray-500 mb-3">
+            Want a personal trainer?
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/trainee/link-trainer")}
+            className="w-full py-2.5 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 transition font-medium text-sm"
+          >
+            Link to Trainer
+          </button>
+        </div>
       </div>
     </div>
   );
