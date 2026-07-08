@@ -239,6 +239,89 @@ const ASSIGNED_EXERCISES = [
 ];
 
 // ---------------------------------------------------------------------------
+// Global Workout Preset templates
+// ---------------------------------------------------------------------------
+const globalWorkoutPresets = [
+  // ── Chest ──
+  { name: "Beginner Chest", description: "Simple chest exercises to build foundational strength.", category: "chest", difficulty: "Beginner", tags: ["chest", "push", "beginner"], estimatedDuration: 30, exercises: [
+    { name: "Push-ups", sets: 3, reps: 10 }, { name: "Dumbbell Bench Press", sets: 3, reps: 10 }, { name: "Incline Dumbbell Press", sets: 3, reps: 10 }, { name: "Chest Flyes (Cable)", sets: 3, reps: 12 }, { name: "Push-ups (Decline)", sets: 3, reps: 8 },
+  ]},
+  { name: "Intermediate Chest", description: "Moderate intensity chest workout for steady gains.", category: "chest", difficulty: "Intermediate", tags: ["chest", "push", "intermediate"], estimatedDuration: 40, exercises: [
+    { name: "Barbell Bench Press", sets: 4, reps: 8 }, { name: "Incline Dumbbell Press", sets: 4, reps: 10 }, { name: "Dumbbell Flyes", sets: 3, reps: 12 }, { name: "Decline Bench Press", sets: 3, reps: 10 }, { name: "Cable Crossovers", sets: 3, reps: 12 },
+  ]},
+  { name: "Advanced Chest", description: "High volume chest workout for experienced lifters.", category: "chest", difficulty: "Advanced", tags: ["chest", "push", "advanced"], estimatedDuration: 50, exercises: [
+    { name: "Heavy Barbell Bench Press", sets: 5, reps: 5 }, { name: "Incline Barbell Press", sets: 4, reps: 8 }, { name: "Dumbbell Pullovers", sets: 3, reps: 10 }, { name: "Weighted Dips", sets: 3, reps: 8 }, { name: "Low-to-High Cable Flyes", sets: 3, reps: 12 }, { name: "Push-ups (Weighted)", sets: 3, reps: 10 },
+  ]},
+  // ── Back ──
+  { name: "Beginner Back", description: "Foundational back exercises for posture and strength.", category: "back", difficulty: "Beginner", tags: ["back", "pull", "beginner"], estimatedDuration: 30, exercises: [
+    { name: "Lat Pulldown", sets: 3, reps: 10 }, { name: "Seated Cable Row", sets: 3, reps: 10 }, { name: "Dumbbell Rows", sets: 3, reps: 10 }, { name: "Face Pulls", sets: 3, reps: 12 }, { name: "Superman Hold", sets: 3, reps: 15 },
+  ]},
+  { name: "Intermediate Back", description: "Build a wider, stronger back with compound pulls.", category: "back", difficulty: "Intermediate", tags: ["back", "pull", "intermediate"], estimatedDuration: 40, exercises: [
+    { name: "Deadlifts", sets: 4, reps: 6 }, { name: "Pull-ups", sets: 4, reps: 8 }, { name: "Barbell Rows", sets: 4, reps: 8 }, { name: "T-Bar Row", sets: 3, reps: 10 }, { name: "Lat Pulldown (Wide Grip)", sets: 3, reps: 10 },
+  ]},
+  { name: "Advanced Back", description: "Intense back workout for maximum width and thickness.", category: "back", difficulty: "Advanced", tags: ["back", "pull", "advanced"], estimatedDuration: 50, exercises: [
+    { name: "Deadlifts (Heavy)", sets: 5, reps: 5 }, { name: "Weighted Pull-ups", sets: 4, reps: 6 }, { name: "Pendlay Rows", sets: 4, reps: 8 }, { name: "Meadows Rows", sets: 3, reps: 10 }, { name: "Straight Arm Pulldown", sets: 3, reps: 12 }, { name: "Shrugs (Dumbbell)", sets: 3, reps: 12 },
+  ]},
+  // ── Bicep ──
+  { name: "Beginner Biceps", description: "Simple and effective bicep exercises to start building arms.", category: "bicep", difficulty: "Beginner", tags: ["bicep", "arms", "pull", "beginner"], estimatedDuration: 25, exercises: [
+    { name: "Dumbbell Curls", sets: 3, reps: 10 }, { name: "Hammer Curls", sets: 3, reps: 10 }, { name: "Barbell Curls", sets: 3, reps: 10 }, { name: "Concentration Curls", sets: 3, reps: 12 },
+  ]},
+  { name: "Bicep Blast", description: "Isolation-focused bicep workout for peak contraction.", category: "bicep", difficulty: "Intermediate", tags: ["bicep", "arms", "pull", "intermediate"], estimatedDuration: 30, exercises: [
+    { name: "Incline Dumbbell Curls", sets: 4, reps: 10 }, { name: "Preacher Curls (EZ Bar)", sets: 4, reps: 10 }, { name: "Cable Curls", sets: 3, reps: 12 }, { name: "Spider Curls", sets: 3, reps: 12 }, { name: "Reverse Curls", sets: 3, reps: 10 },
+  ]},
+  { name: "Bicep & Forearm", description: "Target both biceps and forearms for complete arm development.", category: "bicep", difficulty: "Intermediate", tags: ["bicep", "arms", "forearm", "intermediate"], estimatedDuration: 35, exercises: [
+    { name: "Barbell Curls", sets: 4, reps: 8 }, { name: "Hammer Curls", sets: 4, reps: 10 }, { name: "Wrist Curls", sets: 3, reps: 15 }, { name: "Reverse Wrist Curls", sets: 3, reps: 15 }, { name: "Farmer's Walk", sets: 3, reps: 30 },
+  ]},
+  // ── Tricep ──
+  { name: "Beginner Triceps", description: "Easy tricep exercises to build arm strength.", category: "tricep", difficulty: "Beginner", tags: ["tricep", "arms", "push", "beginner"], estimatedDuration: 25, exercises: [
+    { name: "Tricep Pushdowns (Cable)", sets: 3, reps: 10 }, { name: "Overhead Tricep Extensions", sets: 3, reps: 10 }, { name: "Bench Dips", sets: 3, reps: 10 }, { name: "Skull Crushers (EZ Bar)", sets: 3, reps: 10 },
+  ]},
+  { name: "Tricep Crushers", description: "High-volume tricep isolation for arm density.", category: "tricep", difficulty: "Intermediate", tags: ["tricep", "arms", "push", "intermediate"], estimatedDuration: 30, exercises: [
+    { name: "Close-Grip Bench Press", sets: 4, reps: 8 }, { name: "Tricep Pushdowns (Rope)", sets: 4, reps: 12 }, { name: "Skull Crushers (Dumbbell)", sets: 3, reps: 10 }, { name: "Diamond Push-ups", sets: 3, reps: 10 }, { name: "French Press", sets: 3, reps: 12 },
+  ]},
+  { name: "Advanced Arm Finisher", description: "Burn out both biceps and triceps in one session.", category: "tricep", difficulty: "Advanced", tags: ["tricep", "bicep", "arms", "advanced"], estimatedDuration: 35, exercises: [
+    { name: "Weighted Dips", sets: 4, reps: 8 }, { name: "Skull Crushers (Heavy)", sets: 4, reps: 8 }, { name: "Tricep Pushdowns (Straight Bar)", sets: 3, reps: 12 }, { name: "EZ Bar Curls", sets: 4, reps: 8 }, { name: "Incline Hammer Curls", sets: 3, reps: 10 }, { name: "Cable Overhead Tricep Extension", sets: 3, reps: 12 },
+  ]},
+  // ── Legs ──
+  { name: "Beginner Legs", description: "Foundation leg workout for lower body strength.", category: "legs", difficulty: "Beginner", tags: ["legs", "lower-body", "beginner"], estimatedDuration: 30, exercises: [
+    { name: "Bodyweight Squats", sets: 3, reps: 12 }, { name: "Walking Lunges", sets: 3, reps: 10 }, { name: "Glute Bridges", sets: 3, reps: 12 }, { name: "Calf Raises", sets: 3, reps: 15 }, { name: "Step-ups", sets: 3, reps: 10 },
+  ]},
+  { name: "Leg Day", description: "Intermediate leg workout with compound lifts.", category: "legs", difficulty: "Intermediate", tags: ["legs", "lower-body", "intermediate"], estimatedDuration: 45, exercises: [
+    { name: "Barbell Squats", sets: 4, reps: 8 }, { name: "Romanian Deadlifts", sets: 4, reps: 8 }, { name: "Leg Press", sets: 3, reps: 10 }, { name: "Bulgarian Split Squats", sets: 3, reps: 10 }, { name: "Seated Calf Raises", sets: 4, reps: 15 },
+  ]},
+  { name: "Advanced Legs", description: "High intensity leg day for maximum strength and size.", category: "legs", difficulty: "Advanced", tags: ["legs", "lower-body", "advanced"], estimatedDuration: 55, exercises: [
+    { name: "Heavy Back Squats", sets: 5, reps: 5 }, { name: "Front Squats", sets: 4, reps: 8 }, { name: "Box Jumps", sets: 3, reps: 8 }, { name: "Nordic Curls", sets: 3, reps: 6 }, { name: "Bulgarian Split Squats (Weighted)", sets: 3, reps: 8 }, { name: "Standing Calf Raises", sets: 4, reps: 12 },
+  ]},
+  // ── Shoulder ──
+  { name: "Shoulder Builder", description: "Build rounded, strong shoulders.", category: "shoulder", difficulty: "Beginner", tags: ["shoulder", "push", "upper-body", "beginner"], estimatedDuration: 30, exercises: [
+    { name: "Seated Dumbbell Press", sets: 3, reps: 10 }, { name: "Lateral Raises", sets: 3, reps: 12 }, { name: "Front Raises", sets: 3, reps: 12 }, { name: "Reverse Flyes", sets: 3, reps: 12 }, { name: "Arnold Press", sets: 3, reps: 10 },
+  ]},
+  { name: "Deltoid Focus", description: "Target all three deltoid heads for capped shoulders.", category: "shoulder", difficulty: "Intermediate", tags: ["shoulder", "push", "intermediate"], estimatedDuration: 40, exercises: [
+    { name: "Overhead Press (Barbell)", sets: 4, reps: 8 }, { name: "Lateral Raises (Cable)", sets: 4, reps: 12 }, { name: "Face Pulls", sets: 3, reps: 15 }, { name: "Front Raises (Plate)", sets: 3, reps: 12 }, { name: "Upright Rows", sets: 3, reps: 10 }, { name: "Reverse Pec Deck Flyes", sets: 3, reps: 12 },
+  ]},
+  // ── Core ──
+  { name: "Core Strength", description: "Build a stable, strong core with these exercises.", category: "core", difficulty: "Beginner", tags: ["core", "abs", "beginner"], estimatedDuration: 20, exercises: [
+    { name: "Plank", sets: 3, reps: 30 }, { name: "Bicycle Crunches", sets: 3, reps: 15 }, { name: "Leg Raises", sets: 3, reps: 12 }, { name: "Russian Twists", sets: 3, reps: 20 }, { name: "Dead Bugs", sets: 3, reps: 12 },
+  ]},
+  { name: "Abs & Core", description: "Intense core circuit for definition and endurance.", category: "core", difficulty: "Intermediate", tags: ["core", "abs", "intermediate"], estimatedDuration: 25, exercises: [
+    { name: "Hanging Leg Raises", sets: 3, reps: 10 }, { name: "Cable Crunches", sets: 3, reps: 12 }, { name: "Ab Roller", sets: 3, reps: 10 }, { name: "Pallof Press", sets: 3, reps: 12 }, { name: "Side Plank (Weighted)", sets: 3, reps: 30 }, { name: "Medicine Ball Slams", sets: 3, reps: 12 },
+  ]},
+  // ── Full Body / All ──
+  { name: "Full Body Beginner", description: "A well-rounded full body workout for beginners.", category: "full-body", difficulty: "Beginner", tags: ["full-body", "total-body", "beginner"], estimatedDuration: 35, exercises: [
+    { name: "Goblet Squats", sets: 3, reps: 10 }, { name: "Push-ups", sets: 3, reps: 10 }, { name: "Dumbbell Rows", sets: 3, reps: 10 }, { name: "Plank", sets: 3, reps: 30 }, { name: "Glute Bridges", sets: 3, reps: 12 },
+  ]},
+  { name: "Full Body Intermediate", description: "Compound-focused full body for steady gains.", category: "full-body", difficulty: "Intermediate", tags: ["full-body", "total-body", "intermediate"], estimatedDuration: 45, exercises: [
+    { name: "Barbell Squats", sets: 4, reps: 8 }, { name: "Barbell Bench Press", sets: 4, reps: 8 }, { name: "Bent Over Rows", sets: 4, reps: 8 }, { name: "Overhead Press", sets: 3, reps: 10 }, { name: "Deadlifts", sets: 3, reps: 6 },
+  ]},
+  { name: "Full Body HIIT", description: "High intensity full body circuit for fat burn and conditioning.", category: "full-body", difficulty: "Intermediate", tags: ["full-body", "hiit", "cardio", "intermediate"], estimatedDuration: 30, exercises: [
+    { name: "Burpees", sets: 3, reps: 12 }, { name: "Kettlebell Swings", sets: 3, reps: 15 }, { name: "Box Jumps", sets: 3, reps: 10 }, { name: "Battle Ropes", sets: 3, reps: 30 }, { name: "Mountain Climbers", sets: 3, reps: 30 }, { name: "Thrusters", sets: 3, reps: 10 },
+  ]},
+  { name: "General Strength", description: "Basic strength training for overall fitness.", category: "full-body", difficulty: "Beginner", tags: ["full-body", "strength", "beginner"], estimatedDuration: 40, exercises: [
+    { name: "Dumbbell Squats", sets: 3, reps: 10 }, { name: "Dumbbell Bench Press", sets: 3, reps: 10 }, { name: "Seated Cable Row", sets: 3, reps: 10 }, { name: "Dumbbell Shoulder Press", sets: 3, reps: 10 }, { name: "Plank", sets: 3, reps: 30 },
+  ]},
+];
+
+// ---------------------------------------------------------------------------
 // Seed execution
 // ---------------------------------------------------------------------------
 async function main() {
@@ -530,6 +613,14 @@ async function main() {
     }
   }
   console.log("  3 weeks of feedback for each trainer-trainee pair");
+
+  // ---- Global Workout Presets ----
+  console.log("\nCreating global workout presets...");
+  await prisma.globalWorkoutPreset.deleteMany();
+  for (const preset of globalWorkoutPresets) {
+    await prisma.globalWorkoutPreset.create({ data: preset });
+  }
+  console.log(`  ${globalWorkoutPresets.length} global workout presets created`);
 
   console.log("\n=== Seed complete! ===");
   console.log("Admin:    admin@latraino.com / admin123");
