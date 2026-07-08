@@ -10,7 +10,7 @@ export default function TraineeDashboard() {
 
   if (linkedTrainer) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-lg p-8 text-center mb-6">
             <div className="text-green-500 text-5xl mb-4">&#10003;</div>
@@ -61,7 +61,7 @@ export default function TraineeDashboard() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 text-center">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">
           Trainee Dashboard

@@ -36,7 +36,7 @@ export default function LinkTrainer() {
 
   if (linkedTrainer) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 text-center">
           <div className="text-green-500 text-5xl mb-4">&#10003;</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -64,7 +64,7 @@ export default function LinkTrainer() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">

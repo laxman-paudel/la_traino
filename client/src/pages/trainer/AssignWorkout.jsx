@@ -79,7 +79,7 @@ export default function AssignWorkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-10">
+    <div className="px-4 py-10">
       <div className="max-w-xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Assign Workout

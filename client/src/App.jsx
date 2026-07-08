@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./components/AppLayout";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Login = lazy(() => import("./pages/Login"));
@@ -40,7 +41,7 @@ function App() {
               path="/trainee/dashboard"
               element={
                 <ProtectedRoute roles={["TRAINEE"]}>
-                  <TraineeDashboard />
+                  <AppLayout><TraineeDashboard /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -48,7 +49,7 @@ function App() {
               path="/trainee/link-trainer"
               element={
                 <ProtectedRoute roles={["TRAINEE"]}>
-                  <LinkTrainer />
+                  <AppLayout><LinkTrainer /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -56,7 +57,7 @@ function App() {
               path="/trainee/presets"
               element={
                 <ProtectedRoute roles={["TRAINEE"]}>
-                  <Presets />
+                  <AppLayout><Presets /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -64,7 +65,7 @@ function App() {
               path="/trainee/workouts"
               element={
                 <ProtectedRoute roles={["TRAINEE"]}>
-                  <Workouts />
+                  <AppLayout><Workouts /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -72,7 +73,7 @@ function App() {
               path="/trainee/diet"
               element={
                 <ProtectedRoute roles={["TRAINEE"]}>
-                  <Diet />
+                  <AppLayout><Diet /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -80,7 +81,7 @@ function App() {
               path="/trainee/progress"
               element={
                 <ProtectedRoute roles={["TRAINEE"]}>
-                  <Progress />
+                  <AppLayout><Progress /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -88,7 +89,7 @@ function App() {
               path="/trainer/dashboard"
               element={
                 <ProtectedRoute roles={["TRAINER"]}>
-                  <TrainerDashboard />
+                  <AppLayout><TrainerDashboard /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -96,7 +97,7 @@ function App() {
               path="/trainer/trainees/:id/workout"
               element={
                 <ProtectedRoute roles={["TRAINER"]}>
-                  <AssignWorkout />
+                  <AppLayout><AssignWorkout /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -104,7 +105,7 @@ function App() {
               path="/trainer/trainees/:id/diet"
               element={
                 <ProtectedRoute roles={["TRAINER"]}>
-                  <AssignDiet />
+                  <AppLayout><AssignDiet /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -112,7 +113,7 @@ function App() {
               path="/trainer/trainees/:id/logs"
               element={
                 <ProtectedRoute roles={["TRAINER"]}>
-                  <TraineeLogs />
+                  <AppLayout><TraineeLogs /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -120,7 +121,7 @@ function App() {
               path="/trainer/trainees/:id/feedback"
               element={
                 <ProtectedRoute roles={["TRAINER"]}>
-                  <Feedback />
+                  <AppLayout><Feedback /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -128,7 +129,7 @@ function App() {
               path="/admin/users"
               element={
                 <ProtectedRoute roles={["ADMIN"]}>
-                  <AdminUsers />
+                  <AppLayout><AdminUsers /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -136,7 +137,7 @@ function App() {
               path="/admin/presets"
               element={
                 <ProtectedRoute roles={["ADMIN"]}>
-                  <AdminPresets />
+                  <AppLayout><AdminPresets /></AppLayout>
                 </ProtectedRoute>
               }
             />
@@ -144,7 +145,7 @@ function App() {
               path="/admin/dashboard"
               element={
                 <ProtectedRoute roles={["ADMIN"]}>
-                  <AdminDashboard />
+                  <AppLayout><AdminDashboard /></AppLayout>
                 </ProtectedRoute>
               }
             />
