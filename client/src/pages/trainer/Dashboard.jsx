@@ -75,20 +75,9 @@ export default function TrainerDashboard() {
     });
   }, []);
 
-  const selectAll = useCallback(() => {
-    setSelectedIds(new Set(filtered.map((t) => t.id)));
-  }, [filtered]);
-
   const clearSelection = useCallback(() => {
     setSelectedIds(new Set());
   }, []);
-
-  const allFilteredSelected = filtered.length > 0 && filtered.every((t) => selectedIds.has(t.id));
-  const hasSelection = selectedIds.size > 0;
-  const selectedTrainees = useMemo(
-    () => filtered.filter((t) => selectedIds.has(t.id)),
-    [filtered, selectedIds],
-  );
 
   useEffect(() => {
     setLoading(true);
@@ -180,6 +169,17 @@ export default function TrainerDashboard() {
     }
     return result;
   }, [traineesWithProgress, filter]);
+
+  const selectAll = useCallback(() => {
+    setSelectedIds(new Set(filtered.map((t) => t.id)));
+  }, [filtered]);
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every((t) => selectedIds.has(t.id));
+  const hasSelection = selectedIds.size > 0;
+  const selectedTrainees = useMemo(
+    () => filtered.filter((t) => selectedIds.has(t.id)),
+    [filtered, selectedIds],
+  );
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
