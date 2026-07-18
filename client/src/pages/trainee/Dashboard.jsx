@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getTodayWorkout, getTodayDiet, fetchFeedback } from "../../api/trainee";
+import { getTraineeUpcoming } from "../../api/calendar";
 import { getWeeklyProgress } from "../../api/progress";
 import { SkeletonCard, SkeletonStatCard } from "../../components/Skeleton";
 import PageHeader from "../../components/PageHeader";
@@ -56,7 +57,8 @@ export default function TraineeDashboard() {
       getTodayDiet(),
       getWeeklyProgress(),
       fetchFeedback(),
-    ]).then(([workoutRes, dietRes, progressRes, feedbackRes]) => {
+      getTraineeUpcoming(),
+    ]).then(([workoutRes, dietRes, progressRes, feedbackRes, upcomingRes]) => {
       const todayWorkout =
         workoutRes.status === "fulfilled" ? workoutRes.value.data : null;
       const todayDiet =
@@ -66,11 +68,15 @@ export default function TraineeDashboard() {
       const feedbackList =
         feedbackRes.status === "fulfilled" ? feedbackRes.value.data : [];
 
+      const upcoming =
+        upcomingRes.status === "fulfilled" ? upcomingRes.value.data.schedule : [];
+
       setExtra({
         todayWorkout,
         todayDiet,
         progress,
         latestFeedback: feedbackList.length > 0 ? feedbackList[0] : null,
+        upcoming,
       });
       setLoadingExtra(false);
     });
@@ -170,6 +176,76 @@ export default function TraineeDashboard() {
             )}
           </div>
         </div>
+
+        {extra?.upcoming && extra.upcoming.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">Upcoming Schedule</h3>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
+              {extra.upcoming.map((day) => {
+                const isToday = day.status === "today";
+                const isTomorrow = day.status === "tomorrow";
+                const isCompleted = day.status === "completed";
+                const isAssigned = day.status === "assigned";
+                const isRest = day.status === "rest_day";
+
+                let cardStyle;
+                let statusLabel;
+                let statusStyle;
+                if (isToday) {
+                  cardStyle = "bg-indigo-50 border-indigo-200 ring-1 ring-indigo-300";
+                  statusLabel = "Today";
+                  statusStyle = "bg-indigo-100 text-indigo-700";
+                } else if (isTomorrow) {
+                  cardStyle = "bg-blue-50 border-blue-200";
+                  statusLabel = "Tomorrow";
+                  statusStyle = "bg-blue-100 text-blue-700";
+                } else if (isCompleted) {
+                  cardStyle = "bg-green-50 border-green-200";
+                  statusLabel = "Completed";
+                  statusStyle = "bg-green-100 text-green-700";
+                } else if (isAssigned) {
+                  cardStyle = "bg-white border-gray-200";
+                  statusLabel = "Assigned";
+                  statusStyle = "bg-indigo-50 text-indigo-600";
+                } else {
+                  cardStyle = "bg-gray-50 border-gray-100";
+                  statusLabel = "Rest Day";
+                  statusStyle = "bg-gray-100 text-gray-500";
+                }
+
+                return (
+                  <button
+                    key={day.date}
+                    type="button"
+                    onClick={() => navigate("/trainee/workouts")}
+                    className={`snap-start shrink-0 w-[140px] rounded-xl border p-3 text-left transition hover:shadow-sm cursor-pointer ${cardStyle}`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-gray-400 uppercase">{day.dayName}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${statusStyle}`}>
+                        {statusLabel}
+                      </span>
+                    </div>
+                    <p className={`text-sm font-bold mb-0.5 ${isRest ? "text-gray-300" : "text-gray-900"}`}>
+                      {day.monthDay}
+                    </p>
+                    {!isRest && day.workoutName ? (
+                      <p className="text-[11px] text-gray-500 truncate">{day.workoutName}</p>
+                    ) : !isRest ? (
+                      <p className="text-[11px] text-gray-500">Workout</p>
+                    ) : null}
+                    {!isRest && (
+                      <p className="text-[10px] text-gray-400 mt-0.5">{day.exerciseCount} exercise{day.exerciseCount !== 1 ? "s" : ""}</p>
+                    )}
+                    {isRest && (
+                      <p className="text-[11px] text-gray-300 italic mt-1">No workout</p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 flex gap-4">

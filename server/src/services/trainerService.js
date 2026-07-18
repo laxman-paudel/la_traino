@@ -1,6 +1,14 @@
 const prisma = require("../config/db");
 
 function parseDayName(dayName) {
+  const dateMatch = dayName.match(/^\d{4}-\d{2}-\d{2}$/);
+  if (dateMatch) {
+    const date = new Date(dayName + "T00:00:00");
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+  }
+
   const days = [
     "sunday",
     "monday",

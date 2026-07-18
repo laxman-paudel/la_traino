@@ -14,12 +14,14 @@ const coachingRoutes = require("./routes/coachingRoutes");
 const exerciseHistoryRoutes = require("./routes/exerciseHistoryRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
+const calendarRoutes = require("./routes/calendarRoutes");
 
 const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: true,
+    credentials: true,
   }),
 );
 app.use(express.json({ limit: "5mb" }));
@@ -46,6 +48,7 @@ app.use("/api/trainer/coaching", coachingRoutes);
 app.use("/api/trainee", exerciseHistoryRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/calendar", calendarRoutes);
 
 app.use((err, req, res, next) => {
   const status = err.status || 500;

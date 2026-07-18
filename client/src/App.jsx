@@ -12,12 +12,14 @@ const ChooseRole = lazy(() => import("./pages/ChooseRole"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const TraineeDashboard = lazy(() => import("./pages/trainee/Dashboard"));
+const TraineeCalendar = lazy(() => import("./pages/trainee/Calendar"));
 const LinkTrainer = lazy(() => import("./pages/trainee/LinkTrainer"));
 const Presets = lazy(() => import("./pages/trainee/Presets"));
 const Workouts = lazy(() => import("./pages/trainee/Workouts"));
 const Diet = lazy(() => import("./pages/trainee/Diet"));
 const Progress = lazy(() => import("./pages/trainee/Progress"));
 const TrainerDashboard = lazy(() => import("./pages/trainer/Dashboard"));
+const TrainerCalendar = lazy(() => import("./pages/trainer/Calendar"));
 const AssignWorkout = lazy(() => import("./pages/trainer/AssignWorkout"));
 const AssignDiet = lazy(() => import("./pages/trainer/AssignDiet"));
 const TraineeLogs = lazy(() => import("./pages/trainer/TraineeLogs"));
@@ -119,6 +121,14 @@ function App() {
                   element={
                     <ProtectedRoute roles={["TRAINER"]}>
                       <AppLayout><TrainerDashboard /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainer/calendar"
+                  element={
+                    <ProtectedRoute roles={["TRAINER"]}>
+                      <AppLayout><TrainerCalendar /></AppLayout>
                     </ProtectedRoute>
                   }
                 />
@@ -279,6 +289,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <AppLayout><SettingsPage /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/trainee/calendar"
+                  element={
+                    <ProtectedRoute roles={["TRAINEE"]}>
+                      <AppLayout><TraineeCalendar /></AppLayout>
                     </ProtectedRoute>
                   }
                 />
