@@ -13,6 +13,7 @@ export default function FoodLibrary() {
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("");
   const [formModal, setFormModal] = useState(null);
@@ -20,9 +21,14 @@ export default function FoodLibrary() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const fetchFoods = useCallback(() => {
     const params = {};
-    if (search) params.search = search;
+    if (debouncedSearch) params.search = debouncedSearch;
     if (categoryFilter) params.category = categoryFilter;
     if (ownerFilter) params.owner = ownerFilter;
 
@@ -30,7 +36,7 @@ export default function FoodLibrary() {
       .then((res) => setFoods(res.data || []))
       .catch(() => addToast("Failed to load foods", "error"))
       .finally(() => setLoading(false));
-  }, [search, categoryFilter, ownerFilter, addToast]);
+  }, [debouncedSearch, categoryFilter, ownerFilter, addToast]);
 
   useEffect(() => {
     setLoading(true);

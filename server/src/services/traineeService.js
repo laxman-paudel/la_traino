@@ -1,4 +1,4 @@
-const { prisma } = require("../config/db");
+const prisma = require("../config/db");
 
 async function linkTrainer(traineeId, trainerCode) {
   if (!trainerCode || typeof trainerCode !== "string" || !trainerCode.trim()) {

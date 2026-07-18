@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { SkeletonStatCard } from "../../components/Skeleton";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
+import ErrorState from "../../components/ErrorState";
 
 const cardConfig = [
   {
@@ -91,13 +92,27 @@ export default function Analytics() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    let mounted = true;
     getAnalytics()
-      .then((res) => setData(res.data))
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
+      .then((res) => { if (mounted) setData(res.data); })
+      .catch((err) => { if (mounted) setError(err.response?.data?.error || "Failed to load analytics"); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
   }, []);
+
+  function handleRetry() {
+    setLoading(true);
+    setError("");
+    setData(null);
+    let mounted = true;
+    getAnalytics()
+      .then((res) => { if (mounted) setData(res.data); })
+      .catch((err) => { if (mounted) setError(err.response?.data?.error || "Failed to load analytics"); })
+      .finally(() => { if (mounted) setLoading(false); });
+  }
 
   if (loading) {
     return (
@@ -111,6 +126,15 @@ export default function Analytics() {
             <div key={i} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 h-48 animate-pulse" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Analytics" subtitle="Trainer performance insights" />
+        <ErrorState title="Failed to load analytics" message={error} onRetry={handleRetry} />
       </div>
     );
   }

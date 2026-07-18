@@ -8,6 +8,7 @@ import AppLayout from "./components/AppLayout";
 import NotFound from "./pages/NotFound";
 
 const Landing = lazy(() => import("./pages/Landing"));
+const ChooseRole = lazy(() => import("./pages/ChooseRole"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const TraineeDashboard = lazy(() => import("./pages/trainee/Dashboard"));
@@ -36,6 +37,8 @@ const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const AdminUsers = lazy(() => import("./pages/admin/Users"));
 const AdminPresets = lazy(() => import("./pages/admin/Presets"));
 const AdminGlobalPresets = lazy(() => import("./pages/admin/GlobalPresets"));
+const ProfilePage = lazy(() => import("./pages/Profile"));
+const SettingsPage = lazy(() => import("./pages/Settings"));
 
 function App() {
   return (
@@ -52,6 +55,7 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<Landing />} />
+                <Route path="/choose-role" element={<ChooseRole />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route
@@ -259,6 +263,22 @@ function App() {
                   element={
                     <ProtectedRoute roles={["ADMIN"]}>
                       <AppLayout><AdminDashboard /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout><ProfilePage /></AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout><SettingsPage /></AppLayout>
                     </ProtectedRoute>
                   }
                 />

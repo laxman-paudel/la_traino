@@ -27,6 +27,13 @@ model User {
   profileImage String?
   authProvider AuthProvider @default(LOCAL)
   isActive    Boolean      @default(true)
+  bio         String?
+  gender      String?
+  age         Int?
+  height      Float?
+  weight      Float?
+  location    String?
+  preferences Json?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -58,10 +65,11 @@ model User {
 model TrainerProfile {
   id          Int      @id @default(autoincrement())
   userId      Int      @unique
-  trainerCode String   @unique
-  bio         String?
-  specialties String?
-  createdAt   DateTime @default(now())
+  trainerCode     String   @unique
+  bio             String?
+  specialties     String?
+  yearsExperience Int?
+  createdAt       DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

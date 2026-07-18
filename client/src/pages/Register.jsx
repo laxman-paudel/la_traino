@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { Link, useNavigate, Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { register, googleLogin } from "../api/auth";
 import { ROLE_LINKS } from "../constants";
@@ -63,15 +63,17 @@ function PasswordInput({ value, onChange, placeholder }) {
 
 export default function Register() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loginAction, isAuthenticated } = useAuth();
   const googleInitRef = useRef(false);
   const googleEnabled = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
-  const roleRef = useRef("TRAINEE");
+  const urlRole = searchParams.get("role") === "TRAINER" ? "TRAINER" : "TRAINEE";
+  const roleRef = useRef(urlRole);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("TRAINEE");
+  const [role, setRole] = useState(urlRole);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -213,8 +215,30 @@ export default function Register() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full">
+                Step 2 of 2
+              </span>
+            </div>
+            <div className="flex items-center justify-center gap-0 max-w-[180px] mx-auto mb-1">
+              <div className="w-2.5 h-2.5 rounded-full bg-indigo-600 ring-2 ring-indigo-200" />
+              <div className="flex-1 h-0.5 bg-indigo-600" />
+              <div className="w-2.5 h-2.5 rounded-full bg-indigo-600 ring-2 ring-indigo-200" />
+            </div>
+            <div className="flex justify-center gap-[68px] text-[11px] font-medium text-gray-400 mb-6">
+              <span className="text-indigo-600">Choose Role</span>
+              <span className="text-indigo-600">Create Account</span>
+            </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-1">Create your account</h2>
-            <p className="text-gray-500 text-sm mb-6">Join as a trainee or trainer</p>
+            <p className="text-gray-500 text-sm mb-4">Join as a trainee or trainer</p>
+            <div className="flex justify-center mb-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-full text-xs font-semibold text-indigo-700">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                Registering as {role === "TRAINER" ? "Trainer" : "Trainee"}
+              </span>
+            </div>
 
             {error && (
               <div

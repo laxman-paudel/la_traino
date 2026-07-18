@@ -330,11 +330,44 @@ async function bulkAssignWorkout(trainerId, traineeIds, body) {
     });
   }
 
+  const numericIds = traineeIds.map(Number);
+  const dayDate = parseDayName(day);
+
+  const [trainees, links, existingAssignments] = await Promise.all([
+    prisma.user.findMany({
+      where: { id: { in: numericIds }, role: "TRAINEE" },
+      select: { id: true },
+    }),
+    prisma.trainerLink.findMany({
+      where: { trainerId, traineeId: { in: numericIds } },
+      select: { traineeId: true },
+    }),
+    prisma.assignedWorkout.findMany({
+      where: { traineeId: { in: numericIds }, day: dayDate },
+      select: { id: true, traineeId: true },
+    }),
+  ]);
+
+  const foundIds = new Set(trainees.map((t) => t.id));
+  const linkedIds = new Set(links.map((l) => l.traineeId));
+  const existingMap = new Map(existingAssignments.map((e) => [e.traineeId, e.id]));
+
   const results = [];
-  for (const rawId of traineeIds) {
-    const traineeId = Number(rawId);
+  for (const traineeId of numericIds) {
     try {
-      await assignWorkout(trainerId, traineeId, body);
+      if (!foundIds.has(traineeId)) throw new Error("Trainee not found");
+      if (!linkedIds.has(traineeId)) throw new Error("Trainee not linked to you");
+
+      if (existingMap.has(traineeId)) {
+        await prisma.assignedWorkout.update({
+          where: { id: existingMap.get(traineeId) },
+          data: { exercises },
+        });
+      } else {
+        await prisma.assignedWorkout.create({
+          data: { trainerId, traineeId, day: dayDate, name: day, exercises },
+        });
+      }
       results.push({ traineeId, success: true });
     } catch (err) {
       results.push({ traineeId, success: false, error: err.message || "Unknown error" });
@@ -384,11 +417,44 @@ async function bulkAssignDiet(trainerId, traineeIds, body) {
     });
   }
 
+  const numericIds = traineeIds.map(Number);
+  const dayDate = parseDayName(day);
+
+  const [trainees, links, existingPlans] = await Promise.all([
+    prisma.user.findMany({
+      where: { id: { in: numericIds }, role: "TRAINEE" },
+      select: { id: true },
+    }),
+    prisma.trainerLink.findMany({
+      where: { trainerId, traineeId: { in: numericIds } },
+      select: { traineeId: true },
+    }),
+    prisma.dietPlan.findMany({
+      where: { traineeId: { in: numericIds }, day: dayDate },
+      select: { id: true, traineeId: true },
+    }),
+  ]);
+
+  const foundIds = new Set(trainees.map((t) => t.id));
+  const linkedIds = new Set(links.map((l) => l.traineeId));
+  const existingMap = new Map(existingPlans.map((e) => [e.traineeId, e.id]));
+
   const results = [];
-  for (const rawId of traineeIds) {
-    const traineeId = Number(rawId);
+  for (const traineeId of numericIds) {
     try {
-      await assignDiet(trainerId, traineeId, body);
+      if (!foundIds.has(traineeId)) throw new Error("Trainee not found");
+      if (!linkedIds.has(traineeId)) throw new Error("Trainee not linked to you");
+
+      if (existingMap.has(traineeId)) {
+        await prisma.dietPlan.update({
+          where: { id: existingMap.get(traineeId) },
+          data: { meals: sanitizedMeals },
+        });
+      } else {
+        await prisma.dietPlan.create({
+          data: { trainerId, traineeId, day: dayDate, meals: sanitizedMeals },
+        });
+      }
       results.push({ traineeId, success: true });
     } catch (err) {
       results.push({ traineeId, success: false, error: err.message || "Unknown error" });

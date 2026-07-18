@@ -18,6 +18,7 @@ export default function WorkoutTemplates() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
@@ -28,9 +29,14 @@ export default function WorkoutTemplates() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const fetchTemplates = useCallback(() => {
     const params = {};
-    if (search) params.search = search;
+    if (debouncedSearch) params.search = debouncedSearch;
     if (difficultyFilter) params.difficulty = difficultyFilter;
     if (showArchived) params.archived = true;
     else params.archived = false;
@@ -40,7 +46,7 @@ export default function WorkoutTemplates() {
       .then((res) => setTemplates(res.data))
       .catch(() => addToast("Failed to load templates", "error"))
       .finally(() => setLoading(false));
-  }, [search, difficultyFilter, showArchived, showFavorites, addToast]);
+  }, [debouncedSearch, difficultyFilter, showArchived, showFavorites, addToast]);
 
   useEffect(() => {
     setLoading(true);

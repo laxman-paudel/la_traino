@@ -161,6 +161,11 @@ function Divider({ collapsed }) {
   return <div className="border-t border-gray-100 my-3" />;
 }
 
+const ACCOUNT_ITEMS = [
+  { label: "Profile", path: "/profile", icon: "Account" },
+  { label: "Settings", path: "/settings", icon: "Star" },
+];
+
 const ADMIN_GROUPS = [
   {
     label: "", icon: "Dashboard",
@@ -176,6 +181,10 @@ const ADMIN_GROUPS = [
       { label: "Workout Presets", path: "/admin/presets", icon: "Star" },
       { label: "Global Library", path: "/admin/global-presets", icon: "Star" },
     ],
+  },
+  {
+    label: "Account", icon: "Account",
+    items: ACCOUNT_ITEMS,
   },
 ];
 
@@ -221,6 +230,10 @@ const TRAINER_GROUPS = [
       { label: "Diet Presets", path: "/trainer/presets/diet", icon: "Star" },
     ],
   },
+  {
+    label: "Account", icon: "Account",
+    items: ACCOUNT_ITEMS,
+  },
 ];
 
 const TRAINEE_GROUPS = [
@@ -242,17 +255,15 @@ const TRAINEE_GROUPS = [
     ],
   },
   {
-    label: "Coaching", icon: "Coaching",
-    items: [
-      { label: "Feedback", path: "/trainee/progress", icon: "Coaching" },
-    ],
-  },
-  {
     label: "Setup", icon: "Presets",
     items: [
       { label: "Link Trainer", path: "/trainee/link-trainer", icon: "Users" },
       { label: "Presets", path: "/trainee/presets", icon: "Presets" },
     ],
+  },
+  {
+    label: "Account", icon: "Account",
+    items: ACCOUNT_ITEMS,
   },
 ];
 

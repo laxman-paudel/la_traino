@@ -829,21 +829,17 @@ async function main() {
     "Impressive performance this week! Your bench press form has improved significantly.",
   ];
 
+  // Delete existing feedback for seed users
+  await prisma.feedback.deleteMany({
+    where: { trainerId: { in: allTrainerIds }, traineeId: { in: allTraineeIds } },
+  });
+
   for (let weekOffset = 0; weekOffset < 3; weekOffset++) {
     const weekStart = daysAgo(weekOffset * 7 + 7);
 
-    // Trainer 1 → his 3 trainees
     for (const t of trainer1Trainees) {
-      await prisma.feedback.upsert({
-        where: {
-          trainerId_traineeId_weekStart: {
-            trainerId: trainer1.id,
-            traineeId: traineeUsers[t.email].id,
-            weekStart,
-          },
-        },
-        update: { message: feedbackMessages[(weekOffset + trainer1Trainees.indexOf(t)) % feedbackMessages.length] },
-        create: {
+      await prisma.feedback.create({
+        data: {
           trainerId: trainer1.id,
           traineeId: traineeUsers[t.email].id,
           weekStart,
@@ -852,18 +848,9 @@ async function main() {
       });
     }
 
-    // Trainer 2 → his 3 trainees
     for (const t of trainer2Trainees) {
-      await prisma.feedback.upsert({
-        where: {
-          trainerId_traineeId_weekStart: {
-            trainerId: trainer2.id,
-            traineeId: traineeUsers[t.email].id,
-            weekStart,
-          },
-        },
-        update: { message: feedbackMessages[(weekOffset + trainer2Trainees.indexOf(t) + 2) % feedbackMessages.length] },
-        create: {
+      await prisma.feedback.create({
+        data: {
           trainerId: trainer2.id,
           traineeId: traineeUsers[t.email].id,
           weekStart,
@@ -889,6 +876,9 @@ async function main() {
     await prisma.exercise.create({ data: enrichExercise(ex) });
   }
   console.log(`  ${exerciseData.length} individual exercises created`);
+
+  // ---- Demo Seed ----
+  await require("./demoSeed")();
 
   console.log("\n=== Seed complete! ===");
   console.log("Admin:    admin@latraino.com / admin123");

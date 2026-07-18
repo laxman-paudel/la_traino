@@ -6,6 +6,7 @@ import { useToast } from "../../context/ToastContext";
 import { SkeletonStatCard } from "../../components/Skeleton";
 import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
+import ErrorState from "../../components/ErrorState";
 
 const TABS = [
   { value: "workout", label: "Workout History" },
@@ -26,6 +27,7 @@ export default function History() {
   const tab = searchParams.get("tab") || "workout";
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [traineeFilter, setTraineeFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -43,8 +45,9 @@ export default function History() {
     }, []);
   }, [data]);
 
-  useEffect(() => {
+  function fetchData() {
     setLoading(true);
+    setError("");
     const fetcher = tab === "workout" ? getWorkoutHistory : getDietHistory;
     const params = {};
     if (traineeFilter) params.traineeId = traineeFilter;
@@ -52,10 +55,16 @@ export default function History() {
     if (dateTo) params.dateTo = dateTo;
     if (sort) params.sort = sort;
 
+    let mounted = true;
     fetcher(params)
-      .then((res) => setData(res.data))
-      .catch(() => setData([]))
-      .finally(() => setLoading(false));
+      .then((res) => { if (mounted) setData(res.data); })
+      .catch((err) => { if (mounted) setError(err.response?.data?.error || "Failed to load history"); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
+  }
+
+  useEffect(() => {
+    return fetchData();
   }, [tab, traineeFilter, dateFrom, dateTo, sort]);
 
   function setTab(value) {
@@ -202,6 +211,8 @@ export default function History() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => <SkeletonStatCard key={i} />)}
         </div>
+      ) : error ? (
+        <ErrorState title="Failed to load history" message={error} onRetry={() => fetchData()} />
       ) : data.length === 0 ? (
         <EmptyState
           icon="Presets"

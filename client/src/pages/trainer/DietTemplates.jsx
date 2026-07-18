@@ -18,6 +18,7 @@ export default function DietTemplatesPage() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [formModal, setFormModal] = useState(null);
@@ -26,9 +27,14 @@ export default function DietTemplatesPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const fetchTemplates = useCallback(() => {
     const params = {};
-    if (search) params.search = search;
+    if (debouncedSearch) params.search = debouncedSearch;
     if (showArchived) params.archived = true;
     else params.archived = false;
     if (showFavorites) params.favorited = true;
@@ -37,7 +43,7 @@ export default function DietTemplatesPage() {
       .then((res) => setTemplates(res.data))
       .catch(() => addToast("Failed to load diet templates", "error"))
       .finally(() => setLoading(false));
-  }, [search, showArchived, showFavorites, addToast]);
+  }, [debouncedSearch, showArchived, showFavorites, addToast]);
 
   useEffect(() => {
     setLoading(true);

@@ -1,4 +1,4 @@
-const { prisma } = require("../config/db");
+const prisma = require("../config/db");
 
 const listExercises = async ({ search, category, difficulty, owner, userId, page = 1, limit = 50 }) => {
   const where = {};

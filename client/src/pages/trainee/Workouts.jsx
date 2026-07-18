@@ -370,8 +370,10 @@ export default function Workouts() {
   const cardRefs = useRef([]);
 
   useEffect(() => {
+    let mounted = true;
     getTraineeExerciseComments()
       .then((res) => {
+        if (!mounted) return;
         const map = {};
         (res.data || []).forEach((c) => {
           map[c.exerciseName.toLowerCase()] = c.comment;
@@ -379,16 +381,20 @@ export default function Workouts() {
         setExerciseComments(map);
       })
       .catch(() => {});
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
+    let mounted = true;
     getTodayWorkout()
       .then((res) => {
+        if (!mounted) return;
         setData(res.data);
         setProgress(res.data.progress || []);
         setCompleted(res.data.completed || false);
       })
       .catch((err) => {
+        if (!mounted) return;
         const status = err.response?.status;
         const apiMsg = err.response?.data?.error;
         if (status === 404) {
@@ -397,13 +403,16 @@ export default function Workouts() {
           setError(apiMsg || "Failed to load today's workout");
         }
       })
-      .finally(() => setLoading(false));
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
   }, []);
 
   // Fetch exercise library for detail enrichment
   useEffect(() => {
+    let mounted = true;
     getExercises({ limit: 500 })
       .then((res) => {
+        if (!mounted) return;
         const map = {};
         (res.data?.exercises || []).forEach((ex) => {
           if (ex.name) map[ex.name.toLowerCase()] = ex;
@@ -411,6 +420,7 @@ export default function Workouts() {
         setLibraryMap(map);
       })
       .catch(() => {});
+    return () => { mounted = false; };
   }, []);
 
   const completedCount = progress.filter((p) => p.completed).length;

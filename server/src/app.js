@@ -12,6 +12,8 @@ const foodRoutes = require("./routes/foodRoutes");
 const dietTemplateRoutes = require("./routes/dietTemplateRoutes");
 const coachingRoutes = require("./routes/coachingRoutes");
 const exerciseHistoryRoutes = require("./routes/exerciseHistoryRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const settingsRoutes = require("./routes/settingsRoutes");
 
 const app = express();
 
@@ -20,7 +22,7 @@ app.use(
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
   }),
 );
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 
 app.get("/", (req, res) => {
   res.json({ service: "La Traino API", status: "running" });
@@ -42,6 +44,8 @@ app.use("/api/foods", foodRoutes);
 app.use("/api/trainer/diet-templates", dietTemplateRoutes);
 app.use("/api/trainer/coaching", coachingRoutes);
 app.use("/api/trainee", exerciseHistoryRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/settings", settingsRoutes);
 
 app.use((err, req, res, next) => {
   const status = err.status || 500;

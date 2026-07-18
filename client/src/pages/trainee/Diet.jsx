@@ -149,8 +149,10 @@ export default function Diet() {
   const [dietComments, setDietComments] = useState({});
 
   useEffect(() => {
+    let mounted = true;
     getTraineeDietComments()
       .then((res) => {
+        if (!mounted) return;
         const map = {};
         (res.data || []).forEach((c) => {
           map[c.mealType] = c.comment;
@@ -158,22 +160,27 @@ export default function Diet() {
         setDietComments(map);
       })
       .catch(() => {});
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
+    let mounted = true;
     getTodayDiet()
       .then((res) => {
+        if (!mounted) return;
         setData(res.data);
         setProgress(res.data.progress || {});
         setCompleted(res.data.completed || false);
       })
       .catch((err) => {
+        if (!mounted) return;
         const status = err.response?.status;
         const apiMsg = err.response?.data?.error;
         if (status === 404) setError(apiMsg || "No diet has been assigned for today.");
         else setError(apiMsg || "Failed to load today's diet");
       })
-      .finally(() => setLoading(false));
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
   }, []);
 
   const meals = data?.meals || {};

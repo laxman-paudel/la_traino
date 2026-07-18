@@ -134,32 +134,37 @@ async function assignTemplate(trainerId, templateId, body) {
     return target;
   }
 
+  const numericIds = traineeIds.map(Number);
+  const dayDate = parseDayName(day);
+
+  const [trainees, links, existingPlans] = await Promise.all([
+    prisma.user.findMany({
+      where: { id: { in: numericIds }, role: "TRAINEE" },
+      select: { id: true },
+    }),
+    prisma.trainerLink.findMany({
+      where: { trainerId, traineeId: { in: numericIds } },
+      select: { traineeId: true },
+    }),
+    prisma.dietPlan.findMany({
+      where: { traineeId: { in: numericIds }, day: dayDate },
+      select: { id: true, traineeId: true },
+    }),
+  ]);
+
+  const foundIds = new Set(trainees.map((t) => t.id));
+  const linkedIds = new Set(links.map((l) => l.traineeId));
+  const existingMap = new Map(existingPlans.map((e) => [e.traineeId, e.id]));
+
   const results = [];
-  for (const rawId of traineeIds) {
-    const traineeId = Number(rawId);
+  for (const traineeId of numericIds) {
     try {
-      const trainee = await prisma.user.findUnique({
-        where: { id: traineeId },
-        select: { id: true, role: true },
-      });
-      if (!trainee || trainee.role !== "TRAINEE") throw new Error("Trainee not found");
+      if (!foundIds.has(traineeId)) throw new Error("Trainee not found");
+      if (!linkedIds.has(traineeId)) throw new Error("Trainee not linked to you");
 
-      const link = await prisma.trainerLink.findUnique({
-        where: { traineeId },
-        select: { trainerId: true },
-      });
-      if (!link || link.trainerId !== trainerId) throw new Error("Trainee not linked to you");
-
-      const dayDate = parseDayName(day);
-
-      const existing = await prisma.dietPlan.findFirst({
-        where: { traineeId, day: dayDate },
-        select: { id: true },
-      });
-
-      if (existing) {
+      if (existingMap.has(traineeId)) {
         await prisma.dietPlan.update({
-          where: { id: existing.id },
+          where: { id: existingMap.get(traineeId) },
           data: { meals: template.meals },
         });
       } else {
