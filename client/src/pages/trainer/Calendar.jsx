@@ -143,32 +143,55 @@ export default function TrainerCalendar() {
   function renderDayContent(dateKey, eventData, isDetailed) {
     if (!eventData) return null;
 
-    const { workoutCount, traineeCount } = eventData;
+    const { workoutCount, dietCount, traineeCount } = eventData;
 
     if (isDetailed) {
       return (
-        <div className="space-y-3">
-          {eventData.trainees && eventData.trainees.length > 0 ? (
-            eventData.trainees.map((t, i) => (
-              <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{t.name}</p>
-                  <p className="text-xs text-gray-500">{t.workoutName || "Workout"} &middot; {t.exerciseCount} exercises</p>
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <span>&#x1F3CB;</span> Workouts
+            </h4>
+            {eventData.trainees && eventData.trainees.length > 0 ? (
+              eventData.trainees.map((t, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.workoutName || "Workout"} &middot; {t.exerciseCount} exercises</p>
+                  </div>
+                  <StatusBadge status={t.completed ? "completed" : "pending"} />
                 </div>
-                <StatusBadge status={t.completed ? "completed" : "pending"} />
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-gray-400">No workouts assigned</p>
-          )}
+              ))
+            ) : (
+              <p className="text-sm text-gray-400">No workouts assigned</p>
+            )}
+          </div>
+          <div>
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <span>&#x1F957;</span> Diet Plans
+            </h4>
+            {eventData.dietTrainees && eventData.dietTrainees.length > 0 ? (
+              eventData.dietTrainees.map((t, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.mealCount} meal{t.mealCount !== 1 ? "s" : ""}</p>
+                  </div>
+                  <StatusBadge status={t.completed ? "completed" : "pending"} />
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-400">No diet plans assigned</p>
+            )}
+          </div>
         </div>
       );
     }
 
     return (
       <div className="mt-1 space-y-0.5">
-        <span className="block text-[11px] font-semibold text-indigo-600">{workoutCount} workout{workoutCount !== 1 ? "s" : ""}</span>
-        <span className="block text-[10px] text-gray-500">{traineeCount} trainee{traineeCount !== 1 ? "s" : ""}</span>
+        <span className="block text-[11px] font-semibold text-indigo-600">&#x1F3CB; {workoutCount} workout{workoutCount !== 1 ? "s" : ""}</span>
+        <span className="block text-[10px] font-semibold text-green-600">&#x1F957; {dietCount} diet{dietCount !== 1 ? "s" : ""}</span>
       </div>
     );
   }
@@ -181,7 +204,7 @@ export default function TrainerCalendar() {
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto">
-        <PageHeader title="Calendar" description="View and manage assigned workouts" />
+        <PageHeader title="Calendar" description="View and manage assigned workouts and diet plans" />
         <CalendarSkeleton />
       </div>
     );
@@ -189,7 +212,7 @@ export default function TrainerCalendar() {
 
   return (
     <div className="max-w-6xl mx-auto relative">
-      <PageHeader title="Calendar" description="View and manage assigned workouts" />
+      <PageHeader title="Calendar" description="View and manage assigned workouts and diet plans" />
       <Calendar
         currentDate={currentDate}
         onDateChange={setCurrentDate}
@@ -217,7 +240,7 @@ export default function TrainerCalendar() {
                 </h3>
                 {selectedEventData && (
                   <p className="text-xs text-gray-500 mt-0.5">
-                    {selectedEventData.workoutCount} assigned workout{selectedEventData.workoutCount !== 1 ? "s" : ""}
+                    &#x1F3CB; {selectedEventData.workoutCount} workout{selectedEventData.workoutCount !== 1 ? "s" : ""} &middot; &#x1F957; {selectedEventData.dietCount} diet{selectedEventData.dietCount !== 1 ? "s" : ""}
                   </p>
                 )}
               </div>

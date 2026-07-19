@@ -21,10 +21,7 @@ import ExercisePicker from "../../components/ExercisePicker";
 import ExerciseConfigCard from "../../components/ExerciseConfigCard";
 import WorkoutSummary from "../../components/WorkoutSummary";
 import WorkoutPreview from "../../components/WorkoutPreview";
-
-const DAYS = [
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
-];
+import DatePicker, { todayStr, formatDateStr } from "../../components/DatePicker";
 
 let keyCounter = 0;
 function nextKey() {
@@ -78,7 +75,7 @@ export default function AssignWorkout() {
   const { state: locationState } = useLocation();
   const { addToast } = useToast();
 
-  const [day, setDay] = useState(locationState?.prefillDay || "");
+  const [day, setDay] = useState(locationState?.prefillDay || todayStr());
   const [exercises, setExercises] = useState([]);
   const [step, setStep] = useState("builder"); // builder | mobile-pick
   const [error, setError] = useState("");
@@ -135,8 +132,8 @@ export default function AssignWorkout() {
       addToast("Fix validation errors before saving", "error");
       return;
     }
-    if (!day.trim()) {
-      setError("Please select a day");
+    if (!day) {
+      setError("Please select a date");
       return;
     }
     setError("");
@@ -182,25 +179,15 @@ export default function AssignWorkout() {
 
   const builderPanel = (
     <div className="space-y-4">
-      {/* Day selector */}
+      {/* Date picker */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-        <label htmlFor="builder-day" className="block text-sm font-semibold text-gray-900 mb-2">
-          Day
-        </label>
-        <select
-          id="builder-day"
+        <DatePicker
+          label="Date"
           value={day}
-          onChange={(e) => { setDay(e.target.value); setError(""); }}
-          className={`w-full max-w-xs px-3 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none ${
-            error ? "border-red-300 bg-red-50" : "border-gray-200"
-          }`}
-        >
-          <option value="">Choose a day</option>
-          {DAYS.map((d) => (
-            <option key={d} value={d}>{d}</option>
-          ))}
-        </select>
-        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+          onChange={(v) => { setDay(v); setError(""); }}
+          required
+          error={error}
+        />
       </div>
 
       {/* Summary */}
@@ -323,7 +310,7 @@ export default function AssignWorkout() {
       {/* Preview modal */}
       <WorkoutPreview
         open={showPreview}
-        day={day}
+        day={formatDateStr(day) || day}
         exercises={exercises}
         onClose={() => setShowPreview(false)}
         onConfirm={handleSave}

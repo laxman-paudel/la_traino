@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { getWorkoutPresets, getDietPresets } from "../api/trainerPresets";
 import { bulkAssignWorkout, bulkAssignDiet } from "../api/trainer";
-
-const DAYS = [
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
-];
+import DatePicker, { todayStr } from "./DatePicker";
 
 const STEPS = { SELECT_PRESET: 0, PREVIEW: 1, RESULT: 2 };
 
@@ -13,7 +10,7 @@ export default function BulkAssignModal({ isOpen, onClose, type, trainees, onCom
   const [presets, setPresets] = useState([]);
   const [presetsLoading, setPresetsLoading] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
-  const [day, setDay] = useState("");
+  const [day, setDay] = useState(todayStr());
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
 
@@ -21,7 +18,7 @@ export default function BulkAssignModal({ isOpen, onClose, type, trainees, onCom
     if (!isOpen) return;
     setStep(STEPS.SELECT_PRESET);
     setSelectedPreset(null);
-    setDay("");
+    setDay(todayStr());
     setSubmitting(false);
     setResult(null);
     setPresetsLoading(true);
@@ -194,19 +191,12 @@ export default function BulkAssignModal({ isOpen, onClose, type, trainees, onCom
               </div>
 
               <div className="border-t border-gray-100 pt-3">
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Select Day <span className="text-red-400">*</span>
-                </label>
-                <select
+                <DatePicker
+                  label="Date"
                   value={day}
-                  onChange={(e) => setDay(e.target.value)}
-                  className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900"
-                >
-                  <option value="">Choose a day</option>
-                  {DAYS.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
+                  onChange={setDay}
+                  required
+                />
               </div>
 
               <div className="flex gap-3 pt-2">

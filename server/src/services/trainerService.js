@@ -739,6 +739,49 @@ async function getAnalytics(trainerId) {
   };
 }
 
+async function unlinkTrainerTrainee(actorId, traineeId, actorRole) {
+  const link = await prisma.trainerLink.findUnique({
+    where: { traineeId },
+  });
+
+  if (!link) {
+    throw Object.assign(new Error("No link found"), { status: 404 });
+  }
+
+  if (actorRole === "TRAINER" && link.trainerId !== actorId) {
+    throw Object.assign(new Error("Trainee not linked to you"), { status: 403 });
+  }
+  if (actorRole === "TRAINEE" && link.traineeId !== actorId) {
+    throw Object.assign(new Error("Not your link"), { status: 403 });
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.assignedWorkout.deleteMany({
+      where: { trainerId: link.trainerId, traineeId },
+    });
+    await tx.dietPlan.deleteMany({
+      where: { trainerId: link.trainerId, traineeId },
+    });
+    await tx.feedback.deleteMany({
+      where: { trainerId: link.trainerId, traineeId },
+    });
+    await tx.coachingNote.deleteMany({
+      where: { trainerId: link.trainerId, traineeId },
+    });
+    await tx.exerciseComment.deleteMany({
+      where: { trainerId: link.trainerId, traineeId },
+    });
+    await tx.dietComment.deleteMany({
+      where: { trainerId: link.trainerId, traineeId },
+    });
+    await tx.trainerLink.delete({
+      where: { traineeId },
+    });
+  });
+
+  return { message: "Unlinked successfully" };
+}
+
 module.exports = {
   getDashboard,
   assignWorkout,
@@ -751,4 +794,5 @@ module.exports = {
   getTraineeLogs,
   getFeedback,
   giveFeedback,
+  unlinkTrainerTrainee,
 };

@@ -6,7 +6,7 @@ async function getTrainerCalendar(trainerId, dateFrom, dateTo) {
   const endDate = new Date(dateTo);
   endDate.setHours(23, 59, 59, 999);
 
-  const [assignedWorkouts, workoutLogs] = await Promise.all([
+  const [assignedWorkouts, workoutLogs, dietPlans] = await Promise.all([
     prisma.assignedWorkout.findMany({
       where: { trainerId, day: { gte: startDate, lte: endDate } },
       include: { trainee: { select: { id: true, name: true } } },
@@ -27,6 +27,11 @@ async function getTrainerCalendar(trainerId, dateFrom, dateTo) {
       },
       select: { traineeId: true, day: true, completed: true },
     }),
+    prisma.dietPlan.findMany({
+      where: { trainerId, day: { gte: startDate, lte: endDate } },
+      include: { trainee: { select: { id: true, name: true } } },
+      orderBy: { day: "asc" },
+    }),
   ]);
 
   const logMap = {};
@@ -39,7 +44,7 @@ async function getTrainerCalendar(trainerId, dateFrom, dateTo) {
   for (const aw of assignedWorkouts) {
     const dateKey = aw.day.toISOString().split("T")[0];
     if (!dates[dateKey]) {
-      dates[dateKey] = { workoutCount: 0, traineeIds: new Set(), trainees: [] };
+      dates[dateKey] = { workoutCount: 0, dietCount: 0, traineeIds: new Set(), trainees: [], dietTrainees: [] };
     }
     dates[dateKey].workoutCount++;
     dates[dateKey].traineeIds.add(aw.traineeId);
@@ -53,12 +58,29 @@ async function getTrainerCalendar(trainerId, dateFrom, dateTo) {
     });
   }
 
+  for (const dp of dietPlans) {
+    const dateKey = dp.day.toISOString().split("T")[0];
+    if (!dates[dateKey]) {
+      dates[dateKey] = { workoutCount: 0, dietCount: 0, traineeIds: new Set(), trainees: [], dietTrainees: [] };
+    }
+    dates[dateKey].dietCount++;
+    dates[dateKey].traineeIds.add(dp.traineeId);
+    dates[dateKey].dietTrainees.push({
+      id: dp.trainee.id,
+      name: dp.trainee.name,
+      mealCount: Array.isArray(dp.meals) ? dp.meals.length : 0,
+      completed: dp.completed,
+    });
+  }
+
   const result = {};
   for (const [key, val] of Object.entries(dates)) {
     result[key] = {
       workoutCount: val.workoutCount,
+      dietCount: val.dietCount,
       traineeCount: val.traineeIds.size,
       trainees: val.trainees,
+      dietTrainees: val.dietTrainees,
     };
   }
 
@@ -71,7 +93,7 @@ async function getTraineeCalendar(traineeId, dateFrom, dateTo) {
   const endDate = new Date(dateTo);
   endDate.setHours(23, 59, 59, 999);
 
-  const [assignedWorkouts, workoutLogs] = await Promise.all([
+  const [assignedWorkouts, workoutLogs, dietPlans] = await Promise.all([
     prisma.assignedWorkout.findMany({
       where: { traineeId, day: { gte: startDate, lte: endDate } },
       orderBy: { day: "asc" },
@@ -80,12 +102,27 @@ async function getTraineeCalendar(traineeId, dateFrom, dateTo) {
       where: { traineeId, day: { gte: startDate, lte: endDate } },
       select: { day: true, completed: true, id: true },
     }),
+    prisma.dietPlan.findMany({
+      where: { traineeId, day: { gte: startDate, lte: endDate } },
+      orderBy: { day: "asc" },
+    }),
   ]);
 
   const logMap = {};
   for (const log of workoutLogs) {
     const key = log.day.toISOString().split("T")[0];
     logMap[key] = { completed: log.completed, logId: log.id };
+  }
+
+  const dietMap = {};
+  for (const dp of dietPlans) {
+    const key = dp.day.toISOString().split("T")[0];
+    dietMap[key] = {
+      hasDiet: true,
+      mealCount: Array.isArray(dp.meals) ? dp.meals.length : 0,
+      dietCompleted: dp.completed,
+      dietPlanId: dp.id,
+    };
   }
 
   const dates = {};
@@ -99,7 +136,16 @@ async function getTraineeCalendar(traineeId, dateFrom, dateTo) {
       completed: logInfo.completed,
       logId: logInfo.logId,
       assignedWorkoutId: aw.id,
+      ...dietMap[dateKey],
     };
+  }
+
+  for (const dp of dietPlans) {
+    const dateKey = dp.day.toISOString().split("T")[0];
+    if (!dates[dateKey]) {
+      dates[dateKey] = { hasWorkout: false };
+    }
+    dates[dateKey] = { ...dates[dateKey], ...dietMap[dateKey] };
   }
 
   return { dates };
@@ -126,7 +172,7 @@ async function getTraineeUpcoming(traineeId) {
 
   const dateKeys = days.map((d) => d.dateKey);
 
-  const [assignedWorkouts, workoutLogs] = await Promise.all([
+  const [assignedWorkouts, workoutLogs, dietPlans] = await Promise.all([
     prisma.assignedWorkout.findMany({
       where: { traineeId, day: { gte: today, lte: endDate } },
       orderBy: { day: "asc" },
@@ -134,6 +180,10 @@ async function getTraineeUpcoming(traineeId) {
     prisma.workoutLog.findMany({
       where: { traineeId, day: { gte: today, lte: endDate } },
       select: { day: true, completed: true, id: true },
+    }),
+    prisma.dietPlan.findMany({
+      where: { traineeId, day: { gte: today, lte: endDate } },
+      orderBy: { day: "asc" },
     }),
   ]);
 
@@ -147,6 +197,17 @@ async function getTraineeUpcoming(traineeId) {
   for (const log of workoutLogs) {
     const key = log.day.toISOString().split("T")[0];
     logMap[key] = log;
+  }
+
+  const dietMap = {};
+  for (const dp of dietPlans) {
+    const key = dp.day.toISOString().split("T")[0];
+    dietMap[key] = {
+      hasDiet: true,
+      mealCount: Array.isArray(dp.meals) ? dp.meals.length : 0,
+      dietCompleted: dp.completed,
+      dietPlanId: dp.id,
+    };
   }
 
   const now = new Date();
@@ -173,6 +234,7 @@ async function getTraineeUpcoming(traineeId) {
       exerciseCount: aw && Array.isArray(aw.exercises) ? aw.exercises.length : 0,
       assignedWorkoutId: aw?.id || null,
       status,
+      ...dietMap[d.dateKey],
     };
   });
 

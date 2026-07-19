@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { getDashboard } from "../api/trainer";
 import { assignTemplate } from "../api/templates";
-
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+import DatePicker, { todayStr } from "./DatePicker";
 
 const STEPS = { SELECT_TRAINEES: 0, SELECT_DAY: 1, PREVIEW: 2, RESULT: 3 };
 
@@ -12,7 +11,7 @@ export default function AssignTemplateModal({ template, isOpen, onClose, onCompl
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [search, setSearch] = useState("");
-  const [day, setDay] = useState("");
+  const [day, setDay] = useState(todayStr());
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
 
@@ -21,7 +20,7 @@ export default function AssignTemplateModal({ template, isOpen, onClose, onCompl
     setStep(STEPS.SELECT_TRAINEES);
     setSelectedIds([]);
     setSearch("");
-    setDay("");
+    setDay(todayStr());
     setSubmitting(false);
     setResult(null);
     setLoading(true);
@@ -195,17 +194,12 @@ export default function AssignTemplateModal({ template, isOpen, onClose, onCompl
 
           {step === STEPS.SELECT_DAY && (
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Select Day <span className="text-red-400">*</span></label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {DAYS.map((d) => (
-                  <button key={d} type="button" onClick={() => setDay(d)}
-                    className={`py-3 px-3 rounded-xl text-sm font-medium border transition ${
-                      day === d ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-gray-700 border-gray-200 hover:border-indigo-300"
-                    }`}>
-                    {d}
-                  </button>
-                ))}
-              </div>
+              <DatePicker
+                label="Date"
+                value={day}
+                onChange={setDay}
+                required
+              />
             </div>
           )}
 
@@ -236,7 +230,7 @@ export default function AssignTemplateModal({ template, isOpen, onClose, onCompl
 
               <div className="bg-amber-50 rounded-xl p-3">
                 <p className="text-sm text-amber-800">
-                  <span className="font-medium">Day:</span> {day}
+                  <span className="font-medium">Date:</span> {new Date(day + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
                 </p>
               </div>
             </div>

@@ -190,4 +190,11 @@ router.get(
   exerciseHistoryController.getTrainerHistory,
 );
 
+router.delete(
+  "/trainees/:id",
+  protect,
+  restrictTo("TRAINER"),
+  trainerController.unlinkTrainee,
+);
+
 module.exports = router;

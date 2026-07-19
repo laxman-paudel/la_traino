@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getDashboard, getWorkoutLogs } from "../../api/trainer";
+import { getDashboard, getWorkoutLogs, removeTrainee } from "../../api/trainer";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import { SkeletonStatCard, SkeletonCard } from "../../components/Skeleton";
@@ -65,6 +65,8 @@ export default function TrainerDashboard() {
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkModal, setBulkModal] = useState({ open: false, type: "workout" });
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [removing, setRemoving] = useState(false);
 
   const toggleSelection = useCallback((id) => {
     setSelectedIds((prev) => {
@@ -192,6 +194,26 @@ export default function TrainerDashboard() {
       addToast("Trainer code copied to clipboard", "success");
     } catch {
       addToast("Failed to copy trainer code", "error");
+    }
+  }
+
+  async function handleRemove() {
+    if (!removeTarget) return;
+    setRemoving(true);
+    try {
+      await removeTrainee(removeTarget.id);
+      addToast(`Removed ${removeTarget.name} from your trainees`, "success");
+      setRemoveTarget(null);
+      setData(null);
+      setLoading(true);
+      getDashboard()
+        .then((res) => setData(res.data))
+        .catch((err) => setError(err.response?.data?.error || "Failed to load dashboard"))
+        .finally(() => setLoading(false));
+    } catch {
+      addToast("Failed to remove trainee", "error");
+    } finally {
+      setRemoving(false);
     }
   }
 
@@ -448,7 +470,7 @@ export default function TrainerDashboard() {
                     </p>
                   )}
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => navigate(`/trainer/trainees/${trainee.id}/workout`)}
@@ -477,6 +499,20 @@ export default function TrainerDashboard() {
                     >
                       Feedback
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/trainer/trainees/${trainee.id}/coaching`)}
+                      className="py-2 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition text-sm font-medium"
+                    >
+                      Coaching
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRemoveTarget(trainee)}
+                      className="py-2 border border-red-200 text-red-600 rounded-xl hover:bg-red-50 transition text-sm font-medium"
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
               );
@@ -486,6 +522,34 @@ export default function TrainerDashboard() {
 
         <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
+
+      {removeTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Remove Trainee</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to remove <strong>{removeTarget.name}</strong>? This will delete all assigned workouts, diet plans, and feedback. The trainee's workout history will be preserved.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setRemoveTarget(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={removing}
+                onClick={handleRemove}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 disabled:opacity-50"
+              >
+                {removing ? "Removing..." : "Remove"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BulkAssignModal
         isOpen={bulkModal.open}

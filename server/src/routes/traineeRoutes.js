@@ -6,6 +6,7 @@ const restrictTo = require("../middleware/restrictTo");
 const router = Router();
 
 router.post("/link-trainer", protect, restrictTo("TRAINEE"), traineeController.linkTrainer);
+router.delete("/link-trainer", protect, restrictTo("TRAINEE"), traineeController.unlinkTrainer);
 router.get("/workout", protect, restrictTo("TRAINEE"), traineeController.getTodayWorkout);
 router.patch("/workout/exercise/:index/progress", protect, restrictTo("TRAINEE"), traineeController.updateExerciseProgress);
 router.post("/workout/complete", protect, restrictTo("TRAINEE"), traineeController.completeWorkout);

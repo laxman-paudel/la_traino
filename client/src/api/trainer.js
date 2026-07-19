@@ -59,3 +59,7 @@ export function getFeedback(traineeId) {
 export function saveFeedback(traineeId, data) {
   return api.post(`/trainer/trainees/${traineeId}/feedback`, data);
 }
+
+export function removeTrainee(traineeId) {
+  return api.delete(`/trainer/trainees/${traineeId}`);
+}

@@ -50,6 +50,16 @@ async function getFeedback(req, res) {
   res.json(result);
 }
 
+async function unlinkTrainer(req, res) {
+  const trainerService = require("../services/trainerService");
+  const result = await trainerService.unlinkTrainerTrainee(
+    req.user.userId,
+    req.user.userId,
+    "TRAINEE",
+  );
+  res.json(result);
+}
+
 async function getTraineeExerciseComments(req, res) {
   const result = await coachingService.getTraineeExerciseComments(req.user.userId);
   res.json(result);
@@ -62,6 +72,7 @@ async function getTraineeDietComments(req, res) {
 
 module.exports = {
   linkTrainer,
+  unlinkTrainer,
   getTodayWorkout,
   updateExerciseProgress,
   completeWorkout,

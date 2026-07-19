@@ -122,6 +122,11 @@ async function assignTemplate(trainerId, templateId, body) {
   }
 
   function parseDayName(dayName) {
+    const dateMatch = dayName.match(/^\d{4}-\d{2}-\d{2}$/);
+    if (dateMatch) {
+      const date = new Date(dayName + "T00:00:00");
+      if (!isNaN(date.getTime())) return date;
+    }
     const days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
     const index = days.indexOf(dayName.toLowerCase());
     if (index === -1) throw Object.assign(new Error("Invalid day"), { status: 400 });

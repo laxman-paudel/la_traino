@@ -4,10 +4,7 @@ import { assignDiet } from "../../api/trainer";
 import { getDietPresets } from "../../api/trainerPresets";
 import { useToast } from "../../context/ToastContext";
 import PageHeader from "../../components/PageHeader";
-
-const DAYS = [
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
-];
+import DatePicker, { todayStr } from "../../components/DatePicker";
 
 function FoodChips({ items }) {
   const parsed = items
@@ -39,7 +36,7 @@ export default function AssignDiet() {
   const [presets, setPresets] = useState([]);
   const [presetsLoading, setPresetsLoading] = useState(false);
 
-  const [day, setDay] = useState(locationState?.prefillDay || "");
+  const [day, setDay] = useState(locationState?.prefillDay || todayStr());
   const [meals, setMeals] = useState(
     locationState?.prefillMeals || [{ time: "", items: "" }],
   );
@@ -81,7 +78,7 @@ export default function AssignDiet() {
 
   function validate() {
     const errs = {};
-    if (!day.trim()) errs.day = "Please select a day";
+    if (!day) errs.day = "Please select a date";
     if (meals.length === 0) errs.meals = "At least one meal is required";
     const mealErrors = [];
     for (let i = 0; i < meals.length; i++) {
@@ -205,28 +202,13 @@ export default function AssignDiet() {
 
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Day</h2>
-          <div>
-            <label htmlFor="day" className="block text-sm font-medium text-gray-700 mb-1.5">
-              Select Day <span className="text-red-400">*</span>
-            </label>
-            <select
-              id="day"
-              value={day}
-              onChange={(e) => { setDay(e.target.value); setFieldErrors((prev) => ({ ...prev, day: "" })); }}
-              className={`w-full max-w-xs px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 ${
-                fieldErrors.day ? "border-red-300 bg-red-50" : "border-gray-300"
-              }`}
-            >
-              <option value="">Choose a day</option>
-              {DAYS.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-            {fieldErrors.day && (
-              <p className="mt-1 text-xs text-red-500">{fieldErrors.day}</p>
-            )}
-          </div>
+          <DatePicker
+            label="Date"
+            value={day}
+            onChange={(v) => { setDay(v); setFieldErrors((prev) => ({ ...prev, day: "" })); }}
+            required
+            error={fieldErrors.day}
+          />
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

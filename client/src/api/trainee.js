@@ -31,3 +31,7 @@ export function completeDiet() {
 export function fetchFeedback() {
   return api.get("/trainee/feedback");
 }
+
+export function unlinkTrainer() {
+  return api.delete("/trainee/link-trainer");
+}

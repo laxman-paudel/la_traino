@@ -97,6 +97,16 @@ async function giveFeedback(req, res) {
   res.status(201).json(result);
 }
 
+async function unlinkTrainee(req, res) {
+  const traineeId = parseInt(req.params.id, 10);
+  const result = await trainerService.unlinkTrainerTrainee(
+    req.user.userId,
+    traineeId,
+    "TRAINER",
+  );
+  res.json(result);
+}
+
 module.exports = {
   getDashboard,
   assignWorkout,
@@ -109,4 +119,5 @@ module.exports = {
   getTraineeLogs,
   getFeedback,
   giveFeedback,
+  unlinkTrainee,
 };
