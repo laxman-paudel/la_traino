@@ -207,7 +207,8 @@ client/src/
 │   └── AuthContext.jsx           # createContext, AuthProvider, useAuth hook
 ├── components/
 │   └── ProtectedRoute.jsx        # Route guard based on auth + role
-├── pages/auth/
+├── pages/
+│   ├── ChooseRole.jsx            # Role selection before login/register
 │   ├── Login.jsx                 # Email login + Google button
 │   └── Register.jsx              # Registration with role selector + Google button
 
@@ -222,7 +223,8 @@ server/src/
 ├── routes/
 │   └── authRoutes.js             # POST /register, /login, /google, GET /me
 └── utils/
-    └── generateTrainerCode.js    # 6-char alphanumeric code
+    ├── generateTrainerCode.js    # 6-char alphanumeric code
+    └── validatePassword.js       # Shared password validation (min 8, upper, lower, digit)
 ```
 
 ---
@@ -243,6 +245,7 @@ server/src/
 | Page | Route | Auth Required | Purpose |
 |---|---|---|---|
 | Landing | `/` | No | Public landing with CTA to login/register |
+| Choose Role | `/choose-role` | No | Role selection before login/register |
 | Login | `/login` | No | Email/password form and Google button |
 | Register | `/register` | No | Name, email, password, role selector (Trainee / Trainer), Google button |
 
@@ -261,7 +264,7 @@ server/src/
 | **HTTPS** | Handled by Vercel (frontend) and Render (backend) — both provide free TLS. |
 | **Google token verification** | Server-side verification using Google's official library. Never trust the frontend-only verification. |
 | **Email uniqueness** | Unique constraint in database. Checked before registration. |
-| **Input validation** | Basic validation on the server (email format, password length ≥ 6, name required). |
+| **Input validation** | Server validates email format, password policy (min 8 chars, 1 uppercase, 1 lowercase, 1 number), name required. Shared via `validatePassword.js` utility. |
 
 ---
 

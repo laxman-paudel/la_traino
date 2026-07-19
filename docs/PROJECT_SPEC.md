@@ -96,43 +96,63 @@ Out of scope for MVP:
 
 ## 8. Pages
 
-### Public
+### Public (No Auth Required)
 
 | Route | Page |
 |---|---|
 | `/` | Landing page |
-| `/login` | Login |
-| `/register` | Register as Trainee |
-| `/register-trainer` | Register as Trainer |
+| `/choose-role` | Role selection before login/register |
+| `/login` | Login (email/password + Google OAuth) |
+| `/register` | Register with role toggle (Trainee/Trainer) |
 
-### Trainee Pages
-
-| Route | Page |
-|---|---|
-| `/trainee/dashboard` | Dashboard |
-| `/trainee/workouts` | View daily workout plan and log completion |
-| `/trainee/diet` | View assigned diet plan |
-| `/trainee/progress` | Weekly progress chart |
-| `/trainee/link-trainer` | Enter trainer code to link |
-| `/trainee/presets` | Browse and select preset routine |
-
-### Trainer Pages
+### Trainee Pages (Role: TRAINEE)
 
 | Route | Page |
 |---|---|
-| `/trainer/dashboard` | Dashboard (shows trainer code, stats) |
-| `/trainer/trainees` | List of linked trainees |
-| `/trainer/trainees/:id/workout` | Assign workout plan |
-| `/trainer/trainees/:id/diet` | Assign diet plan |
-| `/trainer/trainees/:id/feedback` | View logs and write feedback |
+| `/trainee/dashboard` | Dashboard — today's workout, diet, progress, feedback |
+| `/trainee/workouts` | Track daily workout with per-set progress |
+| `/trainee/diet` | View and track assigned diet plan |
+| `/trainee/progress` | Weekly progress chart + trainer feedback |
+| `/trainee/calendar` | Monthly/weekly view of scheduled workouts and diet plans |
+| `/trainee/link-trainer` | Enter 6-char trainer code to link |
+| `/trainee/presets` | Browse and select preset workout programs |
+| `/trainee/exercise-history/:exerciseName` | Per-exercise progression chart with personal bests |
 
-### Admin Pages
+### Trainer Pages (Role: TRAINER)
 
 | Route | Page |
 |---|---|
-| `/admin/dashboard` | Dashboard with stats |
-| `/admin/users` | Manage users |
-| `/admin/presets` | Manage preset workout routines |
+| `/trainer/dashboard` | Dashboard — trainer code, linked trainees, quick actions |
+| `/trainer/calendar` | Monthly/weekly calendar with assignment drawer |
+| `/trainer/trainees/:id/workout` | Drag-and-drop workout builder |
+| `/trainer/trainees/:id/diet` | Diet assignment (custom or template) |
+| `/trainer/trainees/:id/logs` | Trainee workout log viewer |
+| `/trainer/trainees/:id/feedback` | Write and view weekly feedback |
+| `/trainer/trainees/:id/exercise-history/:exerciseName` | Trainee's per-exercise performance |
+| `/trainer/templates` | Workout template CRUD + import from global library |
+| `/trainer/diet-templates` | Diet template CRUD + import from global library |
+| `/trainer/exercises` | Exercise library management |
+| `/trainer/foods` | Food item management |
+| `/trainer/coaching` | Coaching hub — timeline, feedback, comments |
+| `/trainer/history` | Browse past assignments with edit/duplicate |
+| `/trainer/analytics` | Trainee performance analytics |
+
+### Admin Pages (Role: ADMIN)
+
+| Route | Page |
+|---|---|
+| `/admin/dashboard` | Dashboard with system statistics |
+| `/admin/users` | User management table with search, sort, enable/disable |
+| `/admin/presets` | Preset workout CRUD |
+| `/admin/global-presets` | Global workout and diet template CRUD |
+
+### Shared Pages (Any Authenticated Role)
+
+| Route | Page |
+|---|---|
+| `/profile` | View/edit name, email, profile image, personal details |
+| `/settings` | Change password, notification preferences |
+| `*` | Custom 404 page with role-aware navigation |
 
 ---
 
@@ -140,68 +160,110 @@ Out of scope for MVP:
 
 ### Trainee (Self-Guided)
 
-- Register with email or Google
+- Register with email or Google (role: TRAINEE)
 - Login with email or Google
-- Browse preset workout routines
+- Browse preset workout programs
 - Select and follow a preset routine
-- Log daily workout completion
-- View weekly progress chart
+- Log daily workout completion with per-set tracking
+- View weekly progress chart with completion rate
+- Calendar view of preset schedule
+- View exercise performance history with personal bests and progression charts
+- View/edit profile and change password
 
 ### Trainee (Trainer-Linked)
 
 - All features of self-guided trainee
-- Link to a trainer using trainer code
+- Link to a trainer using 6-character trainer code
+- Unlink from trainer (clears assignments, preserves history)
 - Receive personalised workout and diet plans from trainer
+- Track per-set progress (sets, reps, weight) with autosave
+- Track per-meal diet completion
 - Receive weekly feedback from trainer
+- View trainer's coaching notes, exercise comments, and diet comments
+- Calendar view of scheduled workouts and diet plans
 
 ### Trainer
 
-- Register with email or Google
+- Register with email or Google (role: TRAINER)
 - Login with email or Google
 - Receive a unique 6-character alphanumeric trainer code on registration
-- View list of linked trainees
-- Assign personalised workout plans to individual trainees
-- Assign personalised diet plans to individual trainees
+- View dashboard with linked trainees, recent activity, and quick stats
+- Assign personalised workout plans to individual trainees (drag-and-drop builder)
+- Assign personalised diet plans (custom mode or from template)
+- Bulk assign workouts to multiple trainees
+- Bulk assign diet plans to multiple trainees
+- Create, edit, duplicate, archive, favorite workout templates
+- Import global workout presets into personal templates
+- Create, edit, duplicate, archive, favorite diet templates
+- Import global diet presets into personal templates
+- Weekly calendar view with per-day workout/diet distribution
+- Coaching hub: timeline, coaching notes, exercise comments, diet comments
 - View trainee workout logs
-- Write weekly feedback for each trainee
+- Write and view weekly feedback for each trainee
+- View trainee exercise performance history with charts
+- Browse past assignments with edit and reassign/duplicate
+- Analytics dashboard (completion rates, active/inactive trends)
+- Manage exercise library (CRUD with search/filters)
+- Manage food library (CRUD with search/filters)
+- Unlink trainees (deletes assignments, preserves logs)
 
 ### Admin
 
 - Login with pre-seeded admin credentials
-- View dashboard with system stats
-- View and disable users
-- Create, edit, and delete preset workout routines
+- View dashboard with system statistics (total users, trainers, trainees)
+- View and search all users
+- Enable/disable user accounts (guards against self-disable and admin-on-admin)
+- Create, edit, and delete preset workout programs
+- Create, edit, and delete global workout presets (importable by trainers)
+- Create, edit, and delete global diet presets (importable by trainers)
 
 ---
 
-## 10. Database Entities
+## 10. Database Entities (17 models)
 
-Only entity names — no schema or fields:
-
-- User
-- TrainerProfile
-- TraineeProfile
-- TrainerLink
-- PresetWorkout
-- PresetWorkoutDay
-- PresetWorkoutExercise
-- AssignedWorkout
-- DietPlan
-- WorkoutLog
-- Feedback
+| Entity | Purpose |
+|--------|---------|
+| User | Core identity — all roles (ADMIN, TRAINER, TRAINEE) |
+| TrainerProfile | Extended profile with unique 6-char trainer code |
+| TraineeProfile | Extended profile with fitness goal and preset selection |
+| TrainerLink | Junction table for trainer–trainee relationship (unique traineeId) |
+| AssignedWorkout | Trainer-assigned workout for a trainee on a specific day |
+| WorkoutLog | Trainee's actual workout completion record with per-set progress |
+| DietPlan | Trainer-assigned diet plan for a trainee on a specific day |
+| Feedback | Trainer weekly feedback for a trainee |
+| CoachingNote | Structured coaching note from trainer to trainee |
+| ExerciseComment | Trainer comment on a specific exercise (unique per trainee) |
+| DietComment | Trainer comment on a specific meal type (unique per trainee) |
+| Exercise | Exercise library item (admin/trainer created) |
+| FoodItem | Food library item (trainer created) |
+| WorkoutTemplate | Reusable workout template for quick assignment |
+| DietTemplate | Reusable diet template for quick assignment |
+| GlobalWorkoutPreset | Admin-created global workout template for trainer import |
+| GlobalDietPreset | Admin-created global diet template for trainer import |
+| PresetWorkout | Multi-day preset program for self-guided trainees |
+| PresetWorkoutDay | Single day within a preset program |
+| PresetWorkoutExercise | Single exercise within a preset day |
 
 ---
 
 ## 11. API Modules
 
-Only module names — no endpoints:
-
-- Auth
-- Trainee
-- Trainer
-- Admin
-- Workout
-- Progress
+| Module | Base Path | Description |
+|--------|-----------|-------------|
+| Auth | `/api/auth` | Register, login, Google OAuth, get current user |
+| Trainee | `/api/trainee` | Link/unlink trainer, workout/diet tracking, feedback, presets, coaching comments, exercise history |
+| Trainer | `/api/trainer` | Dashboard, assign workout/diet, bulk assign, logs, feedback, unlink, history, analytics, global presets |
+| Templates | `/api/trainer/templates` | Workout template CRUD, duplicate, archive, restore, favorite, assign, import global |
+| Diet Templates | `/api/trainer/diet-templates` | Diet template CRUD, duplicate, archive, restore, favorite, assign, import global |
+| Coaching | `/api/trainer/coaching` | Timeline, coaching notes, exercise comments, diet comments |
+| Admin | `/api/admin` | Dashboard stats, user management, preset CRUD, global preset CRUD |
+| Calendar | `/api/calendar` | Monthly events (trainer + trainee views), upcoming workouts |
+| Progress | `/api/progress` | Weekly completion data |
+| Exercises | `/api/exercises` | Exercise library CRUD with search/filters |
+| Foods | `/api/foods` | Food library CRUD with search/filters |
+| Profile | `/api/profile` | Get/update profile, avatar upload |
+| Settings | `/api/settings` | Change password, preferences |
+| Exercise History | `/api/trainee/exercise-history` | Per-exercise history with personal bests |
 
 ---
 
@@ -214,48 +276,66 @@ Only module names — no endpoints:
 | Database | Neon PostgreSQL |
 | Source code | GitHub (private repo) |
 
-Environment variables required: `DATABASE_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID`.
+Environment variables required: `DATABASE_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID`, `FRONTEND_URL` (backend CORS).
 
 ---
 
 ## 13. Project Milestones
 
-### Milestone 1: Foundation (Weeks 1–2)
+### Milestone 1: Foundation
 
 - Initialise Vite + React project with Tailwind and routing skeleton
 - Initialise Express project with Prisma and PostgreSQL connection
-- Create Prisma schema and run initial migration
+- Create Prisma schema (11 core models) and run initial migration
 - Implement auth (register, login, JWT middleware, Google OAuth)
-- Build auth pages (Login, Register, RegisterTrainer)
-- Build AuthContext, ProtectedRoute, Layout, Navbar
+- Build auth pages (Login, Register with role toggle, Landing, ChooseRole)
+- Build AuthContext, ProtectedRoute, AppLayout, Sidebar, TopNavbar
 
-### Milestone 2: Preset Workouts & Self-Guided Flow (Weeks 3–4)
+### Milestone 2: Preset Workouts & Self-Guided Flow
 
-- Seed at least 2 preset workout routines
-- Implement preset workout API
-- Build trainee Dashboard, PresetWorkouts, Workouts, Progress pages
-- Implement workout log API
-- Build admin ManagePresets page
+- Seed 3+ preset workout routines
+- Implement preset workout API (list, select)
+- Build trainee Dashboard, Presets, Workouts, Progress pages
+- Implement workout log API (get, update progress, complete)
 
-### Milestone 3: Trainer-Trainee Linking (Week 5)
+### Milestone 3: Trainer-Trainee Linking
 
 - Implement trainer code generation (6-char alphanumeric)
 - Build LinkTrainer page for trainees
-- Implement link API with validation
-- Build trainer Dashboard and MyTrainees page
+- Implement link/unlink API with validation
+- Build trainer Dashboard with trainee cards
 
-### Milestone 4: Trainer Personalisation (Weeks 6–7)
+### Milestone 4: Trainer Personalisation
 
 - Implement trainer API: assign workout, assign diet, view logs, write feedback
-- Build AssignWorkout, AssignDiet, Feedback pages for trainer
-- Show assigned plans on trainee side
-- Display feedback on trainee Progress page
+- Build AssignWorkout (drag-and-drop), AssignDiet, TraineeLogs, Feedback pages
+- Show assigned plans and feedback on trainee side
+- Add diet tracking for trainees
 
-### Milestone 5: Polish & Deployment (Week 8)
+### Milestone 5: Calendar, Templates & Coaching
 
-- Build Admin Dashboard and ManageUsers page
-- Form validation, loading states, error handling
-- Responsive layout pass (mobile-first)
-- Seed script for demo data
-- Deploy to free-tier hosting
-- Final testing and bug fixes
+- Build calendar API and components (month/week/day views)
+- Implement template system (workout + diet template CRUD, duplicate, archive, favorite)
+- Implement global preset system for admin (workout + diet)
+- Build template import, assign, and bulk assign workflows
+- Add coaching hub with timeline, coaching notes, exercise/diet comments
+
+### Milestone 6: Advanced Features & Admin
+
+- Add exercise library (CRUD with search/filters)
+- Add food library (CRUD with search/filters)
+- Add history browsing with edit/duplicate/reassign
+- Add analytics dashboard (completion rates, active trends)
+- Build admin dashboard, user management, global preset management
+- Add exercise history with per-exercise progression charts
+
+### Milestone 7: Polish & Deployment
+
+- Form validation, password policy (uppercase, lowercase, number, min 8)
+- Loading states, empty states, error handling, toast notifications
+- Responsive layout pass (mobile sidebar, scrollable week view)
+- Comprehensive seed script (13 accounts, 190+ exercises, demo data)
+- CORS production config with allowlist
+- Unlink auth context refresh
+- Deploy to free-tier hosting (Vercel + Render + Neon)
+- Final testing and documentation alignment

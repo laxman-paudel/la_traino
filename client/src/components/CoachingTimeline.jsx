@@ -145,7 +145,7 @@ function TimelineCard({ item, traineeId, onNoteUpdate }) {
   );
 }
 
-export default function CoachingTimeline({ traineeId, items, loading, onRefresh, onNoteUpdate }) {
+export default function CoachingTimeline({ traineeId, items, loading, error, onRefresh, onNoteUpdate }) {
   const [activeFilter, setActiveFilter] = useState("all");
 
   const filtered = activeFilter === "all"
@@ -181,6 +181,19 @@ export default function CoachingTimeline({ traineeId, items, loading, onRefresh,
               <div className="h-3 bg-gray-100 rounded w-2/3" />
             </div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-8">
+          <p className="text-sm text-red-500 mb-2">{error}</p>
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={onRefresh}
+              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline"
+            >
+              Try again
+            </button>
+          )}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-8 text-gray-400 text-sm">

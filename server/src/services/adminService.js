@@ -26,14 +26,28 @@ async function listUsers() {
   });
 }
 
-async function toggleUserStatus(userId) {
+async function toggleUserStatus(userId, adminId) {
+  if (userId === adminId) {
+    throw Object.assign(
+      new Error("Administrators cannot disable their own account"),
+      { status: 400 },
+    );
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, isActive: true },
+    select: { id: true, role: true, isActive: true },
   });
 
   if (!user) {
     throw Object.assign(new Error("User not found"), { status: 404 });
+  }
+
+  if (user.role === "ADMIN") {
+    throw Object.assign(
+      new Error("Administrator accounts cannot be disabled"),
+      { status: 400 },
+    );
   }
 
   return prisma.user.update({

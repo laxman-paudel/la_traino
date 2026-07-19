@@ -79,6 +79,14 @@ async function assignTemplate(req, res) {
   res.status(207).json(result);
 }
 
+async function importFromGlobal(req, res) {
+  const result = await templateService.importFromGlobal(
+    req.user.userId,
+    parseInt(req.params.globalId, 10),
+  );
+  res.status(201).json(result);
+}
+
 module.exports = {
   listTemplates,
   getTemplate,
@@ -90,4 +98,5 @@ module.exports = {
   deleteTemplate,
   toggleFavorite,
   assignTemplate,
+  importFromGlobal,
 };

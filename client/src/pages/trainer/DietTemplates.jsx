@@ -12,6 +12,7 @@ import DietTemplateCard from "../../components/DietTemplateCard";
 import DietTemplateForm from "../../components/DietTemplateForm";
 import DietTemplatePreview from "../../components/DietTemplatePreview";
 import AssignDietTemplateModal from "../../components/AssignDietTemplateModal";
+import GlobalImportModal from "../../components/GlobalImportModal";
 
 export default function DietTemplatesPage() {
   const { addToast } = useToast();
@@ -26,6 +27,7 @@ export default function DietTemplatesPage() {
   const [assignTemplate, setAssignTemplate] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [importModal, setImportModal] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
@@ -101,6 +103,7 @@ export default function DietTemplatesPage() {
     try {
       const res = await toggleDietFavorite(t.id);
       setTemplates((prev) => prev.map((x) => (x.id === t.id ? res.data : x)));
+      addToast(res.data.favorited ? "Diet template favorited" : "Diet template unfavorited", "success");
     } catch (err) {
       addToast(err.response?.data?.error || "Failed to update favorite", "error");
     }
@@ -127,13 +130,22 @@ export default function DietTemplatesPage() {
         title="Diet Templates"
         subtitle="Build meal plans once, assign to many"
         actions={
-          <button type="button" onClick={() => setFormModal("add")}
-            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-semibold shadow-sm shadow-indigo-200">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            New Diet Template
-          </button>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setImportModal(true)}
+              className="flex items-center gap-1.5 px-4 py-2 border border-indigo-200 text-indigo-600 rounded-xl hover:bg-indigo-50 transition text-sm font-semibold">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9.75v6.75m0 0l-3-3m3 3l3-3m-8.25 6a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+              </svg>
+              Import from Global
+            </button>
+            <button type="button" onClick={() => setFormModal("add")}
+              className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-semibold shadow-sm shadow-indigo-200">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              New Diet Template
+            </button>
+          </div>
         }
       />
 
@@ -187,6 +199,17 @@ export default function DietTemplatesPage() {
       {previewTemplate && <DietTemplatePreview template={previewTemplate} onClose={() => setPreviewTemplate(null)} />}
       {formModal && <DietTemplateForm template={formModal === "add" ? null : formModal.template} onSave={handleSave} onClose={() => setFormModal(null)} />}
       {assignTemplate && <AssignDietTemplateModal template={assignTemplate} isOpen={!!assignTemplate} onClose={() => setAssignTemplate(null)} onComplete={() => addToast("Diet assigned successfully", "success")} />}
+      <GlobalImportModal
+        isOpen={importModal}
+        type="diet"
+        onClose={() => setImportModal(false)}
+        onImportComplete={(template) => {
+          setTemplates((prev) => [template, ...prev]);
+          addToast("Imported from global library", "success");
+        }}
+        onImportError={(err) => addToast(err.response?.data?.error || "Failed to import", "error")}
+      />
+
       <ConfirmDialog open={!!deleteTarget} title="Delete Diet Template" message={deleteTarget ? `Delete "${deleteTarget.name}"?` : ""}
         confirmLabel={deleting ? "Deleting..." : "Delete"} cancelLabel="Cancel" danger
         onConfirm={() => handleDelete(deleteTarget.id)} onCancel={() => setDeleteTarget(null)} />

@@ -24,8 +24,7 @@ const AssignWorkout = lazy(() => import("./pages/trainer/AssignWorkout"));
 const AssignDiet = lazy(() => import("./pages/trainer/AssignDiet"));
 const TraineeLogs = lazy(() => import("./pages/trainer/TraineeLogs"));
 const Feedback = lazy(() => import("./pages/trainer/Feedback"));
-const WorkoutPresets = lazy(() => import("./pages/trainer/WorkoutPresets"));
-const DietPresets = lazy(() => import("./pages/trainer/DietPresets"));
+
 const History = lazy(() => import("./pages/trainer/History"));
 const Analytics = lazy(() => import("./pages/trainer/Analytics"));
 const ExerciseLibrary = lazy(() => import("./pages/trainer/ExerciseLibrary"));
@@ -164,23 +163,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/trainer/presets/workout"
-                  element={
-                    <ProtectedRoute roles={["TRAINER"]}>
-                      <AppLayout><WorkoutPresets /></AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/trainer/presets/diet"
-                  element={
-                    <ProtectedRoute roles={["TRAINER"]}>
-                      <AppLayout><DietPresets /></AppLayout>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
+<Route
                   path="/trainer/history"
                   element={
                     <ProtectedRoute roles={["TRAINER"]}>

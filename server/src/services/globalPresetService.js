@@ -130,40 +130,6 @@ async function deleteGlobalDietPreset(id) {
   return { id };
 }
 
-async function importWorkoutPreset(trainerId, globalId) {
-  const global = await prisma.globalWorkoutPreset.findUnique({ where: { id: globalId } });
-  if (!global) {
-    throw Object.assign(new Error("Global workout preset not found"), { status: 404 });
-  }
-
-  return prisma.trainerWorkoutPreset.create({
-    data: {
-      trainerId,
-      name: global.name,
-      description: global.description,
-      difficulty: global.difficulty,
-      estimatedDuration: global.estimatedDuration,
-      exercises: global.exercises,
-    },
-  });
-}
-
-async function importDietPreset(trainerId, globalId) {
-  const global = await prisma.globalDietPreset.findUnique({ where: { id: globalId } });
-  if (!global) {
-    throw Object.assign(new Error("Global diet preset not found"), { status: 404 });
-  }
-
-  return prisma.trainerDietPreset.create({
-    data: {
-      trainerId,
-      name: global.name,
-      description: global.description,
-      meals: global.meals,
-    },
-  });
-}
-
 module.exports = {
   listGlobalWorkoutPresets,
   createGlobalWorkoutPreset,
@@ -173,6 +139,4 @@ module.exports = {
   createGlobalDietPreset,
   updateGlobalDietPreset,
   deleteGlobalDietPreset,
-  importWorkoutPreset,
-  importDietPreset,
 };

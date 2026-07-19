@@ -264,7 +264,18 @@ export default function History() {
                       <span className="w-4 h-4 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                         {i + 1}
                       </span>
-                      {ex.name} — {ex.sets}&times;{ex.reps}
+                      <span>{ex.name} — {ex.sets}&times;{ex.reps}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            `/trainer/trainees/${record.trainee.id}/exercise-history/${encodeURIComponent(ex.name)}`,
+                          )
+                        }
+                        className="ml-auto text-indigo-600 hover:text-indigo-700 font-semibold shrink-0"
+                      >
+                        History
+                      </button>
                     </div>
                   ))}
                 </div>

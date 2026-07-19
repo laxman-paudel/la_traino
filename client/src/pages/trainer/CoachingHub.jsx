@@ -19,6 +19,7 @@ export default function CoachingHub() {
   const [loadingTrainees, setLoadingTrainees] = useState(true);
   const [timeline, setTimeline] = useState([]);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
+  const [timelineError, setTimelineError] = useState("");
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [showExerciseCommentForm, setShowExerciseCommentForm] = useState(false);
   const [showDietCommentForm, setShowDietCommentForm] = useState(false);
@@ -37,11 +38,13 @@ export default function CoachingHub() {
   const loadTimeline = useCallback(async () => {
     if (!selectedTrainee) return;
     setLoadingTimeline(true);
+    setTimelineError("");
     try {
       const res = await getTimeline(selectedTrainee.id, { limit: 100 });
       setTimeline(res.data?.items || []);
     } catch {
       setTimeline([]);
+      setTimelineError("Unable to load coaching activity");
     } finally {
       setLoadingTimeline(false);
     }
@@ -199,6 +202,7 @@ export default function CoachingHub() {
               traineeId={selectedTrainee?.id}
               items={timeline}
               loading={loadingTimeline}
+              error={timelineError}
               onRefresh={handleRefresh}
               onNoteUpdate={handleNoteUpdate}
             />

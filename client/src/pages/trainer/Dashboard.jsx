@@ -501,7 +501,7 @@ export default function TrainerDashboard() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => navigate(`/trainer/trainees/${trainee.id}/coaching`)}
+                      onClick={() => navigate("/trainer/coaching")}
                       className="py-2 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition text-sm font-medium"
                     >
                       Coaching

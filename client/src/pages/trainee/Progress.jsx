@@ -19,18 +19,30 @@ export default function Progress() {
   const [data, setData] = useState(null);
   const [feedback, setFeedback] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [progressError, setProgressError] = useState("");
+  const [feedbackError, setFeedbackError] = useState("");
 
   useEffect(() => {
-    Promise.all([getWeeklyProgress(), fetchFeedback()])
-      .then(([progressRes, feedbackRes]) => {
-        setData(progressRes.data);
-        setFeedback(feedbackRes.data);
-      })
-      .catch((err) =>
-        setError(err.response?.data?.error || "Failed to load progress"),
-      )
-      .finally(() => setLoading(false));
+    Promise.allSettled([getWeeklyProgress(), fetchFeedback()]).then(
+      ([progressResult, feedbackResult]) => {
+        if (progressResult.status === "fulfilled") {
+          setData(progressResult.value.data);
+        } else {
+          setProgressError(
+            progressResult.reason?.response?.data?.error ||
+              "Failed to load progress",
+          );
+        }
+        if (feedbackResult.status === "fulfilled") {
+          setFeedback(feedbackResult.value.data);
+        } else {
+          setFeedbackError(
+            feedbackResult.reason?.response?.data?.error ||
+              "Failed to load feedback",
+          );
+        }
+      },
+    ).finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -46,14 +58,14 @@ export default function Progress() {
     );
   }
 
-  if (error) {
+  if (!data && feedback.length === 0 && progressError && feedbackError) {
     return (
       <div className="space-y-6">
         <PageHeader title="Weekly Progress" />
         <EmptyState
           icon="chart"
           title="Unable to Load Progress"
-          message={error}
+          message={progressError}
         />
       </div>
     );
@@ -95,7 +107,14 @@ export default function Progress() {
         </div>
       </div>
 
-      {chartData.length > 0 ? (
+      {progressError && !data ? (
+        <EmptyState
+          icon="chart"
+          title="Unable to Load Progress"
+          message={progressError}
+          compact
+        />
+      ) : chartData.length > 0 ? (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4">
             Daily Overview
@@ -138,7 +157,14 @@ export default function Progress() {
         <h2 className="text-lg font-bold text-gray-900 mb-4">
           Weekly Feedback
         </h2>
-        {feedback.length === 0 ? (
+        {feedbackError && feedback.length === 0 ? (
+          <EmptyState
+            icon="clipboard"
+            title="Unable to Load Feedback"
+            message={feedbackError}
+            compact
+          />
+        ) : feedback.length === 0 ? (
           <EmptyState
             icon="clipboard"
             title="No Feedback Yet"

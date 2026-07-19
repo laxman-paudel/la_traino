@@ -17,5 +17,6 @@ router.patch("/:id/restore", dietTemplateController.restoreTemplate);
 router.delete("/:id", dietTemplateController.deleteTemplate);
 router.patch("/:id/favorite", dietTemplateController.toggleFavorite);
 router.post("/:id/assign", dietTemplateController.assignTemplate);
+router.post("/import-global/:globalId", dietTemplateController.importFromGlobal);
 
 module.exports = router;

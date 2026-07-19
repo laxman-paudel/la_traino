@@ -235,33 +235,37 @@ function MobileMonthView({ grid, events, selectedDate, onSelectDate, renderDayCo
 function WeekView({ weekDays, events, selectedDate, onSelectDate, renderDayContent }) {
   return (
     <div>
-      <DayHeaders />
-      <div className="grid grid-cols-7 gap-px bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
-        {weekDays.map((date, i) => {
-          const dateKey = formatDateKey(date);
-          const eventData = events[dateKey];
-          const isSelected = isSameDate(date, selectedDate);
-          const today = isToday(date);
-          return (
-            <button
-              key={i}
-              type="button"
-              onClick={() => onSelectDate(date)}
-              className={`min-h-[120px] p-1.5 text-left transition cursor-pointer hover:bg-gray-50 bg-white ${
-                isSelected ? "ring-2 ring-indigo-500 ring-inset" : ""
-              }`}
-            >
-              <span
-                className={`inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full ${
-                  today ? "bg-indigo-600 text-white" : "text-gray-900"
-                }`}
-              >
-                {date.getDate()}
-              </span>
-              {renderDayContent && renderDayContent(dateKey, eventData)}
-            </button>
-          );
-        })}
+      <div className="overflow-x-auto">
+        <div className="min-w-[560px]">
+          <DayHeaders />
+          <div className="grid grid-cols-7 gap-px bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
+            {weekDays.map((date, i) => {
+              const dateKey = formatDateKey(date);
+              const eventData = events[dateKey];
+              const isSelected = isSameDate(date, selectedDate);
+              const today = isToday(date);
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => onSelectDate(date)}
+                  className={`min-h-[120px] p-1.5 text-left transition cursor-pointer hover:bg-gray-50 bg-white ${
+                    isSelected ? "ring-2 ring-indigo-500 ring-inset" : ""
+                  }`}
+                >
+                  <span
+                    className={`inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full ${
+                      today ? "bg-indigo-600 text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {date.getDate()}
+                  </span>
+                  {renderDayContent && renderDayContent(dateKey, eventData)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

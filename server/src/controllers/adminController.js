@@ -12,7 +12,7 @@ async function listUsers(req, res) {
 
 async function toggleUserStatus(req, res) {
   const userId = parseInt(req.params.id, 10);
-  const result = await adminService.toggleUserStatus(userId);
+  const result = await adminService.toggleUserStatus(userId, req.user.userId);
   res.json(result);
 }
 

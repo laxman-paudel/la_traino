@@ -419,6 +419,11 @@ async function bulkAssignDiet(trainerId, traineeIds, body) {
     }
   }
 
+  const sanitizedMeals = meals.map((meal) => ({
+    time: meal.time.trim(),
+    items: meal.items.map((item) => item.trim()).filter(Boolean),
+  }));
+
   if (!Array.isArray(traineeIds) || traineeIds.length === 0) {
     throw Object.assign(new Error("traineeIds must be a non-empty array"), {
       status: 400,

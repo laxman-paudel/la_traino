@@ -39,3 +39,7 @@ export function toggleDietFavorite(id) {
 export function assignDietTemplate(id, data) {
   return api.post(`/trainer/diet-templates/${id}/assign`, data);
 }
+
+export function importFromGlobalDiet(globalId) {
+  return api.post(`/trainer/diet-templates/import-global/${globalId}`);
+}

@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
-import { getWorkoutPresets, getDietPresets } from "../api/trainerPresets";
-import { bulkAssignWorkout, bulkAssignDiet } from "../api/trainer";
+import { getTemplates, assignTemplate } from "../api/templates";
+import { getDietTemplates, assignDietTemplate } from "../api/dietTemplates";
 import DatePicker, { todayStr } from "./DatePicker";
 
 const STEPS = { SELECT_PRESET: 0, PREVIEW: 1, RESULT: 2 };
 
 export default function BulkAssignModal({ isOpen, onClose, type, trainees, onComplete }) {
   const [step, setStep] = useState(STEPS.SELECT_PRESET);
-  const [presets, setPresets] = useState([]);
-  const [presetsLoading, setPresetsLoading] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState(null);
+  const [templates, setTemplates] = useState([]);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [day, setDay] = useState(todayStr());
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
@@ -17,30 +17,32 @@ export default function BulkAssignModal({ isOpen, onClose, type, trainees, onCom
   useEffect(() => {
     if (!isOpen) return;
     setStep(STEPS.SELECT_PRESET);
-    setSelectedPreset(null);
+    setSelectedTemplate(null);
     setDay(todayStr());
     setSubmitting(false);
     setResult(null);
-    setPresetsLoading(true);
-    const fetcher = type === "workout" ? getWorkoutPresets : getDietPresets;
+    setTemplatesLoading(true);
+    const fetcher = type === "workout"
+      ? () => getTemplates({ archived: false })
+      : () => getDietTemplates({ archived: false });
     fetcher()
-      .then((res) => setPresets(res.data))
-      .catch(() => setPresets([]))
-      .finally(() => setPresetsLoading(false));
+      .then((res) => setTemplates(res.data))
+      .catch(() => setTemplates([]))
+      .finally(() => setTemplatesLoading(false));
   }, [isOpen, type]);
 
   if (!isOpen) return null;
 
   const label = type === "workout" ? "Workout" : "Diet";
 
-  function handleSelectPreset(preset) {
-    setSelectedPreset(preset);
+  function handleSelectTemplate(tpl) {
+    setSelectedTemplate(tpl);
     setStep(STEPS.PREVIEW);
   }
 
   function handleBack() {
     setStep(STEPS.SELECT_PRESET);
-    setSelectedPreset(null);
+    setSelectedTemplate(null);
   }
 
   function nameForId(id) {
@@ -48,17 +50,29 @@ export default function BulkAssignModal({ isOpen, onClose, type, trainees, onCom
     return t ? t.name : `Trainee #${id}`;
   }
 
+  function formatMealEntries(meals) {
+    if (!meals || typeof meals !== "object") return [];
+    return Object.entries(meals)
+      .filter(([, items]) => Array.isArray(items) && items.length > 0)
+      .map(([time, items]) => ({
+        time: time.charAt(0).toUpperCase() + time.slice(1),
+        items: items.join(", "),
+      }));
+  }
+
+  function getMealCount(meals) {
+    if (!meals || typeof meals !== "object") return 0;
+    return Object.values(meals).filter((v) => Array.isArray(v) && v.length > 0).length;
+  }
+
   async function handleConfirm() {
-    if (!day || !selectedPreset) return;
+    if (!day || !selectedTemplate) return;
     setSubmitting(true);
-    const assigner = type === "workout" ? bulkAssignWorkout : bulkAssignDiet;
-    const data = type === "workout"
-      ? { day, exercises: selectedPreset.exercises }
-      : { day, meals: selectedPreset.meals };
+    const assigner = type === "workout" ? assignTemplate : assignDietTemplate;
     try {
       const res = await assigner(
-        trainees.map((t) => t.id),
-        data,
+        selectedTemplate.id,
+        { traineeIds: trainees.map((t) => t.id), day },
       );
       setResult(res.data);
       setStep(STEPS.RESULT);
@@ -105,30 +119,30 @@ export default function BulkAssignModal({ isOpen, onClose, type, trainees, onCom
         <div className="p-5">
           {step === STEPS.SELECT_PRESET && (
             <div>
-              {presetsLoading ? (
+              {templatesLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
                 </div>
-              ) : presets.length === 0 ? (
+              ) : templates.length === 0 ? (
                 <p className="text-sm text-gray-500 text-center py-4">
-                  No {label.toLowerCase()} presets found.
+                  No {label.toLowerCase()} templates found.
                 </p>
               ) : (
                 <div className="space-y-2 max-h-72 overflow-y-auto">
-                  {presets.map((p) => (
+                  {templates.map((tpl) => (
                     <button
-                      key={p.id}
+                      key={tpl.id}
                       type="button"
-                      onClick={() => handleSelectPreset(p)}
+                      onClick={() => handleSelectTemplate(tpl)}
                       className="w-full text-left border border-gray-200 rounded-xl p-3.5 hover:border-indigo-300 hover:bg-indigo-50/50 transition"
                     >
-                      <p className="text-sm font-semibold text-gray-900">{p.name}</p>
+                      <p className="text-sm font-semibold text-gray-900">{tpl.name}</p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         {type === "workout"
-                          ? `${Array.isArray(p.exercises) ? p.exercises.length : 0} exercises`
-                          : `${Array.isArray(p.meals) ? p.meals.length : 0} meals`}
-                        {p.difficulty ? ` · ${p.difficulty}` : ""}
-                        {p.estimatedDuration ? ` · ~${p.estimatedDuration}min` : ""}
+                          ? `${Array.isArray(tpl.exercises) ? tpl.exercises.length : 0} exercises`
+                          : `${getMealCount(tpl.meals)} meals`}
+                        {tpl.difficulty ? ` · ${tpl.difficulty}` : ""}
+                        {tpl.estimatedDuration ? ` · ~${tpl.estimatedDuration}min` : ""}
                       </p>
                     </button>
                   ))}
@@ -137,7 +151,7 @@ export default function BulkAssignModal({ isOpen, onClose, type, trainees, onCom
             </div>
           )}
 
-          {step === STEPS.PREVIEW && selectedPreset && (
+          {step === STEPS.PREVIEW && selectedTemplate && (
             <div className="space-y-4">
               <div>
                 <p className="text-sm font-semibold text-gray-700 mb-2">
@@ -157,11 +171,11 @@ export default function BulkAssignModal({ isOpen, onClose, type, trainees, onCom
 
               <div className="border-t border-gray-100 pt-3">
                 <p className="text-sm font-semibold text-gray-700 mb-2">
-                  Preset: {selectedPreset.name}
+                  Template: {selectedTemplate.name}
                 </p>
                 {type === "workout" ? (
                   <div className="text-xs text-gray-500 space-y-1 max-h-28 overflow-y-auto">
-                    {(selectedPreset.exercises || []).map((ex, i) => (
+                    {(selectedTemplate.exercises || []).map((ex, i) => (
                       <div key={i} className="flex items-center gap-2">
                         <span className="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-[10px] font-bold shrink-0">
                           {i + 1}
@@ -174,15 +188,15 @@ export default function BulkAssignModal({ isOpen, onClose, type, trainees, onCom
                   </div>
                 ) : (
                   <div className="text-xs text-gray-500 space-y-1 max-h-28 overflow-y-auto">
-                    {(selectedPreset.meals || []).map((meal, i) => (
+                    {formatMealEntries(selectedTemplate.meals).map((meal, i) => (
                       <div key={i} className="flex items-start gap-2">
                         <span className="w-5 h-5 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center text-[10px] font-bold shrink-0 mt-px">
                           {i + 1}
                         </span>
                         <div>
-                          <span className="font-medium">{meal.time}</span>
+                          <span className="font-medium capitalize">{meal.time}</span>
                           <span className="text-gray-400">: </span>
-                          <span>{Array.isArray(meal.items) ? meal.items.join(", ") : meal.items}</span>
+                          <span>{meal.items}</span>
                         </div>
                       </div>
                     ))}

@@ -6,6 +6,9 @@ export default function DietTemplateCard({ template, onPreview, onEdit, onDuplic
   const totalItems = mealKeys.reduce((sum, key) => sum + (Array.isArray(template.meals?.[key]) ? template.meals[key].length : 0), 0);
   const mealCount = mealKeys.filter((key) => Array.isArray(template.meals?.[key]) && template.meals[key].length > 0).length;
   const isArchived = template.archived;
+  const allFoods = mealKeys.flatMap((key) => Array.isArray(template.meals?.[key]) ? template.meals[key].map((f) => f.name) : []);
+  const visibleFoods = allFoods.slice(0, 3);
+  const extraCount = allFoods.length - 3;
 
   const menuItems = [
     { label: "Preview", onClick: () => onPreview(template) },
@@ -38,6 +41,13 @@ export default function DietTemplateCard({ template, onPreview, onEdit, onDuplic
         </div>
 
         {template.description && <p className="text-xs text-gray-500 mb-3 line-clamp-2">{template.description}</p>}
+
+        {visibleFoods.length > 0 && (
+          <p className="text-xs text-gray-400 mb-2 line-clamp-2">
+            {visibleFoods.join(", ")}
+            {extraCount > 0 && <span className="text-gray-300"> +{extraCount} more</span>}
+          </p>
+        )}
 
         <div className="flex flex-wrap gap-2 text-xs text-gray-400 mb-3">
           <span>{totalItems} food item{totalItems !== 1 ? "s" : ""}</span>

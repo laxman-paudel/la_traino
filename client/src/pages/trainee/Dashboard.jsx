@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
+import { fetchMe } from "../../api/auth";
 import { getTodayWorkout, getTodayDiet, fetchFeedback, unlinkTrainer } from "../../api/trainee";
 import { getTraineeUpcoming } from "../../api/calendar";
 import { getWeeklyProgress } from "../../api/progress";
@@ -36,7 +37,7 @@ function StatusBadge({ assigned, label }) {
 
 export default function TraineeDashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loginAction } = useAuth();
   const { addToast } = useToast();
 
   const [showUnlinkModal, setShowUnlinkModal] = useState(false);
@@ -91,6 +92,9 @@ export default function TraineeDashboard() {
     setUnlinking(true);
     try {
       await unlinkTrainer();
+      const res = await fetchMe();
+      const token = localStorage.getItem("token");
+      loginAction(token, res.data.user);
       addToast("Successfully left your trainer", "success");
       setShowUnlinkModal(false);
       navigate("/trainee/dashboard", { replace: true });

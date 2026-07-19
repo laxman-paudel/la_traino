@@ -143,6 +143,24 @@ async function assignTemplate(trainerId, templateId, body) {
   });
 }
 
+async function importFromGlobal(trainerId, globalId) {
+  const global = await prisma.globalWorkoutPreset.findUnique({ where: { id: globalId } });
+  if (!global) {
+    throw Object.assign(new Error("Global workout preset not found"), { status: 404 });
+  }
+
+  return prisma.workoutTemplate.create({
+    data: {
+      trainerId,
+      name: global.name,
+      description: global.description,
+      difficulty: global.difficulty,
+      estimatedDuration: global.estimatedDuration,
+      exercises: global.exercises,
+    },
+  });
+}
+
 module.exports = {
   listTemplates,
   getTemplate,
@@ -154,4 +172,5 @@ module.exports = {
   deleteTemplate,
   toggleFavorite,
   assignTemplate,
+  importFromGlobal,
 };

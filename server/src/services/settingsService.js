@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const prisma = require("../config/db");
+const { validatePassword } = require("../utils/validatePassword");
 
 const DEFAULT_PREFERENCES = {
   theme: "light",
@@ -31,9 +32,7 @@ async function changePassword(userId, currentPassword, newPassword) {
     throw Object.assign(new Error("Current password is incorrect"), { status: 400 });
   }
 
-  if (newPassword.length < 6) {
-    throw Object.assign(new Error("New password must be at least 6 characters"), { status: 400 });
-  }
+  validatePassword(newPassword);
 
   const hashed = await bcrypt.hash(newPassword, 10);
   await prisma.user.update({

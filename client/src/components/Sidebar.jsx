@@ -229,13 +229,7 @@ const TRAINER_GROUPS = [
       { label: "History", path: "/trainer/history", icon: "Star" },
     ],
   },
-  {
-    label: "Presets", icon: "Presets",
-    items: [
-      { label: "Workout Presets", path: "/trainer/presets/workout", icon: "Star" },
-      { label: "Diet Presets", path: "/trainer/presets/diet", icon: "Star" },
-    ],
-  },
+
   {
     label: "Account", icon: "Account",
     items: ACCOUNT_ITEMS,

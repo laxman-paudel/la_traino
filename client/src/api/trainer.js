@@ -36,16 +36,8 @@ export function getGlobalWorkoutPresets() {
   return api.get("/trainer/global-presets/workout");
 }
 
-export function importGlobalWorkoutPreset(globalId) {
-  return api.post("/trainer/global-presets/workout/import", { globalId });
-}
-
 export function getGlobalDietPresets() {
   return api.get("/trainer/global-presets/diet");
-}
-
-export function importGlobalDietPreset(globalId) {
-  return api.post("/trainer/global-presets/diet/import", { globalId });
 }
 
 export function getWorkoutLogs(traineeId) {

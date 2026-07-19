@@ -39,3 +39,7 @@ export function toggleFavorite(id) {
 export function assignTemplate(id, data) {
   return api.post(`/trainer/templates/${id}/assign`, data);
 }
+
+export function importFromGlobalWorkout(globalId) {
+  return api.post(`/trainer/templates/import-global/${globalId}`);
+}

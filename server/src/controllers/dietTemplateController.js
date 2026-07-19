@@ -69,8 +69,17 @@ async function assignTemplate(req, res) {
   res.status(207).json(result);
 }
 
+async function importFromGlobal(req, res) {
+  const result = await dietTemplateService.importFromGlobal(
+    req.user.userId,
+    parseInt(req.params.globalId, 10),
+  );
+  res.status(201).json(result);
+}
+
 module.exports = {
   listTemplates, getTemplate, createTemplate, updateTemplate,
   duplicateTemplate, archiveTemplate, restoreTemplate, deleteTemplate,
   toggleFavorite, assignTemplate,
+  importFromGlobal,
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { assignDiet } from "../../api/trainer";
-import { getDietPresets } from "../../api/trainerPresets";
+import { getDietTemplates } from "../../api/dietTemplates";
 import { useToast } from "../../context/ToastContext";
 import PageHeader from "../../components/PageHeader";
 import DatePicker, { todayStr } from "../../components/DatePicker";
@@ -33,8 +33,8 @@ export default function AssignDiet() {
   const { addToast } = useToast();
 
   const [mode, setMode] = useState("custom");
-  const [presets, setPresets] = useState([]);
-  const [presetsLoading, setPresetsLoading] = useState(false);
+  const [templates, setTemplates] = useState([]);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
 
   const [day, setDay] = useState(locationState?.prefillDay || todayStr());
   const [meals, setMeals] = useState(
@@ -45,12 +45,12 @@ export default function AssignDiet() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (mode !== "preset") return;
-    setPresetsLoading(true);
-    getDietPresets()
-      .then((res) => setPresets(res.data))
+    if (mode !== "template") return;
+    setTemplatesLoading(true);
+    getDietTemplates({ archived: false })
+      .then((res) => setTemplates(res.data))
       .catch(() => {})
-      .finally(() => setPresetsLoading(false));
+      .finally(() => setTemplatesLoading(false));
   }, [mode]);
 
   function handleMealChange(index, field, value) {
@@ -67,13 +67,16 @@ export default function AssignDiet() {
     setMeals((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function loadPreset(preset) {
-    setMeals(
-      preset.meals.map((m) => ({
-        time: m.time,
-        items: Array.isArray(m.items) ? m.items.join(", ") : "",
-      })),
-    );
+  function loadTemplate(tpl) {
+    const entries = [];
+    if (tpl.meals && typeof tpl.meals === "object") {
+      for (const [time, items] of Object.entries(tpl.meals)) {
+        if (Array.isArray(items) && items.length > 0) {
+          entries.push({ time, items: items.join(", ") });
+        }
+      }
+    }
+    setMeals(entries);
   }
 
   function validate() {
@@ -147,45 +150,50 @@ export default function AssignDiet() {
         </button>
         <button
           type="button"
-          onClick={() => setMode("preset")}
+          onClick={() => setMode("template")}
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
-            mode === "preset"
+            mode === "template"
               ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
               : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
-          Use Preset
+          Use Template
         </button>
       </div>
 
-      {mode === "preset" && (
+      {mode === "template" && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Select a Preset</h2>
-          {presetsLoading ? (
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Select a Diet Template</h2>
+          {templatesLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full" />
             </div>
-          ) : presets.length === 0 ? (
+          ) : templates.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-4">
-              No diet presets yet.{" "}
-              <button type="button" onClick={() => navigate("/trainer/presets/diet")}
+              No diet templates yet.{" "}
+              <button type="button" onClick={() => navigate("/trainer/diet-templates")}
                 className="text-indigo-600 hover:text-indigo-700 font-medium">Create one</button>.
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              {presets.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => loadPreset(p)}
-                  className="text-left border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:bg-indigo-50/50 transition"
-                >
-                  <p className="text-sm font-semibold text-gray-900">{p.name}</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {Array.isArray(p.meals) ? p.meals.length : 0} meals
-                  </p>
-                </button>
-              ))}
+              {templates.map((tpl) => {
+                const mealCount = tpl.meals && typeof tpl.meals === "object"
+                  ? Object.values(tpl.meals).filter((v) => Array.isArray(v) && v.length > 0).length
+                  : 0;
+                return (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => loadTemplate(tpl)}
+                    className="text-left border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:bg-indigo-50/50 transition"
+                  >
+                    <p className="text-sm font-semibold text-gray-900">{tpl.name}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {mealCount} meals
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

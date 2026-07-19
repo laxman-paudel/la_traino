@@ -44,18 +44,6 @@ async function deleteGlobalDietPreset(req, res) {
   res.json(result);
 }
 
-async function importWorkoutPreset(req, res) {
-  const { globalId } = req.body;
-  const result = await globalPresetService.importWorkoutPreset(req.user.userId, globalId);
-  res.status(201).json(result);
-}
-
-async function importDietPreset(req, res) {
-  const { globalId } = req.body;
-  const result = await globalPresetService.importDietPreset(req.user.userId, globalId);
-  res.status(201).json(result);
-}
-
 module.exports = {
   listGlobalWorkoutPresets,
   createGlobalWorkoutPreset,
@@ -65,6 +53,4 @@ module.exports = {
   createGlobalDietPreset,
   updateGlobalDietPreset,
   deleteGlobalDietPreset,
-  importWorkoutPreset,
-  importDietPreset,
 };

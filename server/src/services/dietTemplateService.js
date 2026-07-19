@@ -192,8 +192,35 @@ async function assignTemplate(trainerId, templateId, body) {
   };
 }
 
+async function importFromGlobal(trainerId, globalId) {
+  const global = await prisma.globalDietPreset.findUnique({ where: { id: globalId } });
+  if (!global) {
+    throw Object.assign(new Error("Global diet preset not found"), { status: 404 });
+  }
+
+  const meals = {};
+  if (Array.isArray(global.meals)) {
+    for (const meal of global.meals) {
+      const key = meal.time?.toLowerCase().replace(/\s+/g, "");
+      if (key && Array.isArray(meal.items)) {
+        meals[key] = meal.items;
+      }
+    }
+  }
+
+  return prisma.dietTemplate.create({
+    data: {
+      trainerId,
+      name: global.name,
+      description: global.description,
+      meals,
+    },
+  });
+}
+
 module.exports = {
   listTemplates, getTemplate, createTemplate, updateTemplate,
   duplicateTemplate, archiveTemplate, restoreTemplate, deleteTemplate,
   toggleFavorite, assignTemplate,
+  importFromGlobal,
 };

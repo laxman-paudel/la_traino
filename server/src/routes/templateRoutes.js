@@ -17,5 +17,6 @@ router.patch("/:id/restore", templateController.restoreTemplate);
 router.delete("/:id", templateController.deleteTemplate);
 router.patch("/:id/favorite", templateController.toggleFavorite);
 router.post("/:id/assign", templateController.assignTemplate);
+router.post("/import-global/:globalId", templateController.importFromGlobal);
 
 module.exports = router;

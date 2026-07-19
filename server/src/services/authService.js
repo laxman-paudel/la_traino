@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const prisma = require("../config/db");
 const generateTrainerCode = require("../utils/generateTrainerCode");
+const { validatePassword } = require("../utils/validatePassword");
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -54,26 +55,7 @@ async function register({ name, email, password, role }) {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw Object.assign(new Error("Valid email is required"), { status: 400 });
   }
-  if (!password || password.length < 8) {
-    throw Object.assign(new Error("Password must be at least 8 characters"), {
-      status: 400,
-    });
-  }
-  if (!/[A-Z]/.test(password)) {
-    throw Object.assign(new Error("Password must contain at least one uppercase letter"), {
-      status: 400,
-    });
-  }
-  if (!/[a-z]/.test(password)) {
-    throw Object.assign(new Error("Password must contain at least one lowercase letter"), {
-      status: 400,
-    });
-  }
-  if (!/[0-9]/.test(password)) {
-    throw Object.assign(new Error("Password must contain at least one number"), {
-      status: 400,
-    });
-  }
+  validatePassword(password);
   const normalizedRole = role?.toUpperCase();
   if (!["TRAINER", "TRAINEE"].includes(normalizedRole)) {
     throw Object.assign(new Error("Role must be TRAINER or TRAINEE"), {

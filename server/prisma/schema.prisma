@@ -48,8 +48,7 @@ model User {
   dietPlansAsTrainee        DietPlan[]        @relation("DietPlanTrainee")
   feedbackGiven             Feedback[]        @relation("FeedbackGiven")
   feedbackReceived          Feedback[]        @relation("FeedbackReceived")
-  workoutPresets            TrainerWorkoutPreset[]
-  dietPresets               TrainerDietPreset[]
+
   exercises                 Exercise[]
   workoutTemplates          WorkoutTemplate[]
   foodItems                 FoodItem[]
@@ -271,36 +270,6 @@ model WorkoutTemplate {
   favorited        Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-
-  trainer User @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-
-  @@index([trainerId])
-}
-
-model TrainerWorkoutPreset {
-  id               Int      @id @default(autoincrement())
-  trainerId        Int
-  name             String
-  description      String?
-  difficulty       String?
-  estimatedDuration Int?
-  exercises        Json
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  trainer User @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-
-  @@index([trainerId])
-}
-
-model TrainerDietPreset {
-  id          Int      @id @default(autoincrement())
-  trainerId   Int
-  name        String
-  description String?
-  meals       Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
   trainer User @relation(fields: [trainerId], references: [id], onDelete: Cascade)
 

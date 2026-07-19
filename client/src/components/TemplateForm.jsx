@@ -111,7 +111,7 @@ export default function TemplateForm({ template, onSave, onClose }) {
               <label className="text-sm font-medium text-gray-700">Exercises <span className="text-red-400">*</span></label>
               <button type="button" onClick={addExercise} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">+ Add Exercise</button>
             </div>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className="space-y-2">
               {form.exercises.map((ex, i) => (
                 <div key={i} className="bg-gray-50 rounded-xl p-3 space-y-2">
                   <div className="flex items-center gap-2">
