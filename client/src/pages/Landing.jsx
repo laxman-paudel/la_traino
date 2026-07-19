@@ -78,25 +78,6 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="py-16 bg-indigo-50/50 border-y border-indigo-100/50">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
-            {[
-              { stat: "100+", label: "Fitness Professionals", desc: "Trusted by trainers worldwide" },
-              { stat: "10,000+", label: "Workouts Created", desc: "And counting every day" },
-              { stat: "4.8/5", label: "User Rating", desc: "From trainees and trainers" },
-              { stat: "99.9%", label: "Uptime", desc: "Reliable when you need it" },
-            ].map((item) => (
-              <div key={item.label} className="text-center">
-                <p className="text-3xl lg:text-4xl font-extrabold text-indigo-600">{item.stat}</p>
-                <p className="text-sm font-semibold text-gray-900 mt-1">{item.label}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="py-16 lg:py-20 px-6 max-w-5xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900">
